@@ -219,8 +219,8 @@ Updated 2026-09-26 (v0.3.0).
 - **Phase 2, step 2 done:** sword (Z/J/Space, bottom and right face
   buttons) swings in front; hammer (X/K, left and top face buttons) spins
   all around. Hit shapes and timing live in `scripts/attacks.gd`.
-- **Waiting for an OK on where they go:** Charlie's in-game microphone
-  (tell the sword "whatever you want"), and islands, each with a boss,
-  leading to a final boss. Both are in `docs/pitch.md`.
+- **Scheduled after the touch test** (Gareth's OK): Charlie's in-game
+  microphone (tell the sword "whatever you want"), and islands, each with
+  a boss, leading to a final boss. Both are in `docs/pitch.md`.
 - **Next: Phase 2, step 3**, baddies and gems. Check first: Charlie said
   "every fight drops" gems, then "beat the boss, you get the gems".

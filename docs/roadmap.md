@@ -38,3 +38,7 @@ Shapes for art throughout; real art comes after Charlie says it's fun.
 
 ## After the touch test (to plan with Charlie and Gareth)
 - Dragons (boss or baddie: Charlie decides), a name, real art
+- The talking sword: an in-game microphone; you tell the sword what to do
+  (Gareth OK'd placing it here, 2026-09-26)
+- Islands, each with a boss; beat every boss to reach the final boss
+  (Gareth OK'd placing it here, 2026-09-26)
