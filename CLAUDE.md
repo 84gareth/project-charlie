@@ -206,5 +206,7 @@ so, kindly.
 Updated 2026-09-26 (v0.1.0).
 - **Phase 0 (setup) done.** An empty, runnable Godot project showing its
   name and version, both test lanes, the hard limits, and git.
-- **Next: Phase 1, decide the game with Charlie** (a short interview, one
-  question at a time, then a one-page pitch).
+- **Phase 1 in progress.** Charlie's first interview is done; the pitch is
+  in `docs/pitch.md` (a city fighting game with a sword and hammer, gems to
+  collect). Next: settle the open questions at the bottom of the pitch,
+  then the first touch test.

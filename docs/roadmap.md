@@ -11,10 +11,10 @@ agreed before they're added (CLAUDE.md rule 11).
   (`.claude/`)
 
 ## Phase 1: Decide the game (with Charlie)
-- Interview Charlie, one easy question at a time: who you play as, what you
+- ✅ Interview Charlie, one easy question at a time: who you play as, what you
   do over and over, what it looks like, what makes it fun (then Gareth and
   Claude settle 2D or 3D, controls, and winning or losing)
-- One-page pitch in `docs/pitch.md`, in Charlie's words where possible
+- ✅ One-page pitch in `docs/pitch.md`, in Charlie's words where possible
 - Revisit project settings the answer affects (resolution, stretch mode,
   pixel-art filtering, renderer, physics)
 - Replace this phase list with the real roadmap to a first playable
