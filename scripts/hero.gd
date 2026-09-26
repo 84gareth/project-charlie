@@ -15,6 +15,8 @@ const Attacks = preload("res://scripts/attacks.gd")
 var facing: int = 1
 var walk_area: Rect2 = Layout.WALK_AREA
 var attack := Attacks.State.new()
+## Counts up with every attack, so a baddie is hit once per swing or spin.
+var attack_id: int = 0
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("sword"):
@@ -24,6 +26,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _start_attack(kind: String) -> void:
 	if attack.start(kind):
+		attack_id += 1
 		attack_started.emit(kind)
 
 func _process(delta: float) -> void:

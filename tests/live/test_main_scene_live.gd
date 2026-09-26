@@ -19,3 +19,4 @@ func test_main_scene_shows_street_hero_and_version() -> void:
 	assert_eq(_main.get_node("%VersionLabel").text, "v" + version, "version label")
 	assert_eq(_main.get_node("%Hero").position, Layout.HERO_START, "hero at the start spot")
 	assert_eq(_main.get_node("%Camera").limit_right, Layout.WORLD_WIDTH, "camera stops at the street's end")
+	assert_eq(_main.get_node("%GemLabel").text, "0", "gem counter starts at zero")

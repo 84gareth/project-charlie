@@ -27,6 +27,8 @@ collect the gems they leave behind.
 - **Islands and bosses:** "Theres different islands and on each island is a
   boss and if you beat the boss you get the gems. You defeat every single
   one to reach the final boss."
+- **Who gives gems?** Charlie picked **every baddie** (beat one, get a
+  gem). Boss gems can come with the islands.
 
 ## Keep it right for a 5-year-old
 Cartoon fighting only: bonks and swooshes, no blood, nothing scary. Baddies

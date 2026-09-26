@@ -29,8 +29,9 @@ Shapes for art throughout; real art comes after Charlie says it's fun.
    hammer does Charlie's spin attack all around (v0.3.0). Talking to the
    sword through the in-game microphone waits until after the touch test
    (Charlie agreed: button first).
-3. Baddies walk in; hit one and it sinks into the ground and drops a gem;
-   pick gems up and count them (v0.4.0)
+3. ✅ Baddies walk in; hit one and it sinks into the ground and drops a
+   gem; pick gems up and count them (v0.4.0). Waves of three, from just
+   off-screen; two hits each; a new wave 1.5 s after the last one is beaten.
 4. Hearts: baddies hit back; out of hearts restarts the fight, gems kept
    (v0.5.0)
 5. Pick a boy or a girl at the start (v0.6.0)

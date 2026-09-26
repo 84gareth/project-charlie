@@ -208,7 +208,7 @@ so, kindly.
   needs to check.
 
 ## Current status
-Updated 2026-09-26 (v0.3.0).
+Updated 2026-09-26 (v0.4.0).
 - **Phases 0 and 1 done.** The pitch is in `docs/pitch.md`: a belt
   beat-'em-up in a city (like Power Rangers: Rita's Rewind), sword and
   hammer, gems to collect, keyboard plus Xbox and Switch controllers.
@@ -222,5 +222,9 @@ Updated 2026-09-26 (v0.3.0).
 - **Scheduled after the touch test** (Gareth's OK): Charlie's in-game
   microphone (tell the sword "whatever you want"), and islands, each with
   a boss, leading to a final boss. Both are in `docs/pitch.md`.
-- **Next: Phase 2, step 3**, baddies and gems. Check first: Charlie said
-  "every fight drops" gems, then "beat the boss, you get the gems".
+- **Phase 2, step 3 done:** waves of three purple monsters walk up beside
+  the hero; two hits and they sink into the ground and leave a gem; walk
+  onto gems to count them (top-left counter). Numbers in
+  `scripts/baddie_brain.gd`, `scripts/waves.gd`, `scripts/gems.gd`; `main.gd`
+  runs the fight. Charlie chose: every baddie gives a gem.
+- **Next: Phase 2, step 4**, hearts: baddies hit back.
