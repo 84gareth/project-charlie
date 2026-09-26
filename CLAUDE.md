@@ -208,7 +208,7 @@ so, kindly.
   needs to check.
 
 ## Current status
-Updated 2026-09-26 (v0.2.0).
+Updated 2026-09-26 (v0.3.0).
 - **Phases 0 and 1 done.** The pitch is in `docs/pitch.md`: a belt
   beat-'em-up in a city (like Power Rangers: Rita's Rewind), sword and
   hammer, gems to collect, keyboard plus Xbox and Switch controllers.
@@ -216,4 +216,11 @@ Updated 2026-09-26 (v0.2.0).
   left, right, up and down on keyboard, d-pad or stick, and the camera
   follows. Controller buttons are set up in code (`scripts/controls.gd`),
   not the editor's Input Map.
-- **Next: Phase 2, step 2**, sword and hammer.
+- **Phase 2, step 2 done:** sword (Z/J/Space, bottom and right face
+  buttons) swings in front; hammer (X/K, left and top face buttons) spins
+  all around. Hit shapes and timing live in `scripts/attacks.gd`.
+- **Waiting for an OK on where they go:** Charlie's in-game microphone
+  (tell the sword "whatever you want"), and islands, each with a boss,
+  leading to a final boss. Both are in `docs/pitch.md`.
+- **Next: Phase 2, step 3**, baddies and gems. Check first: Charlie said
+  "every fight drops" gems, then "beat the boss, you get the gems".

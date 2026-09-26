@@ -16,7 +16,31 @@ const MOVES: Dictionary = {
 	"move_down": {"keys": [KEY_DOWN, KEY_S], "dpad": JOY_BUTTON_DPAD_DOWN, "axis": JOY_AXIS_LEFT_Y, "dir": 1.0},
 }
 
+## Any of the four face buttons does something. Godot names them by where
+## they sit (A is the bottom one), so on a Switch pad the letters differ
+## but the places match: bottom and right swing the sword, left and top
+## spin the hammer.
+const BUTTONS: Dictionary = {
+	"sword": {"keys": [KEY_Z, KEY_J, KEY_SPACE], "pad": [JOY_BUTTON_A, JOY_BUTTON_B]},
+	"hammer": {"keys": [KEY_X, KEY_K], "pad": [JOY_BUTTON_X, JOY_BUTTON_Y]},
+}
+
 static func install() -> void:
+	for action: String in BUTTONS:
+		if InputMap.has_action(action):
+			InputMap.erase_action(action)
+		InputMap.add_action(action)
+		var b: Dictionary = BUTTONS[action]
+		for keycode: Key in b["keys"]:
+			var key := InputEventKey.new()
+			key.device = -1
+			key.physical_keycode = keycode
+			InputMap.action_add_event(action, key)
+		for button: JoyButton in b["pad"]:
+			var pad := InputEventJoypadButton.new()
+			pad.device = -1
+			pad.button_index = button
+			InputMap.action_add_event(action, pad)
 	for action: String in MOVES:
 		if InputMap.has_action(action):
 			InputMap.erase_action(action)

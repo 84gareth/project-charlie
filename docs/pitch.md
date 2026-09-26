@@ -19,6 +19,15 @@ collect the gems they leave behind.
 8. **Beating a baddie:** "they sink into the ground".
 9. **Getting hit:** you **lose a heart**.
 
+## More from Charlie (2026-09-26, second chat)
+- **The sword:** "you have a microphone and tell the sword what to do".
+  The microphone is in the game, not a real one. What do you tell it? "you
+  tell the sword whatever you want to".
+- **The hammer:** "you do a spin hammer attack".
+- **Islands and bosses:** "Theres different islands and on each island is a
+  boss and if you beat the boss you get the gems. You defeat every single
+  one to reach the final boss."
+
 ## Keep it right for a 5-year-old
 Cartoon fighting only: bonks and swooshes, no blood, nothing scary. Baddies
 sink into the ground rather than anything grim. The game must play without

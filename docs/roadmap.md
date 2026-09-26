@@ -23,9 +23,12 @@ agreed before they're added (CLAUDE.md rule 11).
 
 ## Phase 2: The first touch test
 Shapes for art throughout; real art comes after Charlie says it's fun.
-1. A city street; the hero walks left, right, up and down, on keyboard or
-   an Xbox or Switch controller (v0.2.0)
-2. Sword and hammer: one button each (v0.3.0)
+1. ✅ A city street; the hero walks left, right, up and down, on keyboard
+   or an Xbox or Switch controller (v0.2.0)
+2. ✅ Sword and hammer: one button each; the sword swings in front, the
+   hammer does Charlie's spin attack all around (v0.3.0). Talking to the
+   sword through the in-game microphone waits until after the touch test
+   (Charlie agreed: button first).
 3. Baddies walk in; hit one and it sinks into the ground and drops a gem;
    pick gems up and count them (v0.4.0)
 4. Hearts: baddies hit back; out of hearts restarts the fight, gems kept

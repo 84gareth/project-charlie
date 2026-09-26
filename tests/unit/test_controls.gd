@@ -47,6 +47,16 @@ func test_controller_stick_walks_the_right_way() -> void:
 	assert_false(_stick(JOY_AXIS_LEFT_X, 1.0).is_action_pressed("move_left"), "stick right is not left")
 	assert_false(_stick(JOY_AXIS_LEFT_X, -0.1).is_action_pressed("move_left"), "a tiny wobble is ignored")
 
+func test_sword_and_hammer_buttons() -> void:
+	assert_true(InputMap.event_is_action(_key(KEY_Z), "sword"), "Z swings the sword")
+	assert_true(InputMap.event_is_action(_key(KEY_SPACE), "sword"), "space swings the sword")
+	assert_true(InputMap.event_is_action(_key(KEY_X), "hammer"), "X spins the hammer")
+	assert_true(InputMap.event_is_action(_pad(JOY_BUTTON_A), "sword"), "bottom face button")
+	assert_true(InputMap.event_is_action(_pad(JOY_BUTTON_B), "sword"), "right face button")
+	assert_true(InputMap.event_is_action(_pad(JOY_BUTTON_X), "hammer"), "left face button")
+	assert_true(InputMap.event_is_action(_pad(JOY_BUTTON_Y), "hammer"), "top face button")
+	assert_false(InputMap.event_is_action(_pad(JOY_BUTTON_A), "hammer"), "bottom is not the hammer")
+
 func test_installing_twice_does_not_double_up() -> void:
 	var before: int = InputMap.action_get_events("move_left").size()
 	Controls.install()
