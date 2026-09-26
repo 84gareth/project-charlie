@@ -110,6 +110,17 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
       4. **What's next**
       5. **Model and effort level required**, e.g. `Opus 5.5 · high`.
     - Never use the phrase "load-bearing". Say the actual thing.
+    - **Something to test? End with a launch block** (Gareth, 2026-09-26):
+      when an update leaves anything for Gareth or Charlie to try, the very
+      end of the message is a `bash` code block that cds into this folder
+      and runs `tools/playtest.sh` with the mode that shows the new thing,
+      so the Run button starts it. After the five headings, nothing after:
+      ```bash
+      cd "/Users/gareth/Projects/Project Charlie" && tools/playtest.sh fight
+      ```
+      Modes: `street` (normal game), `practice` (no baddies), `fight`
+      (a wave straight away), `editor`. Add a mode to the launcher (and
+      `scripts/playtest_args.gd`) when a new screen or mode needs one.
 11. **Work the roadmap in order; don't silently insert.** `docs/roadmap.md` is
     the single ordered list. When something new comes up, propose where it
     goes and get an OK before adding it.

@@ -8,6 +8,7 @@ const Attacks = preload("res://scripts/attacks.gd")
 const Brain = preload("res://scripts/baddie_brain.gd")
 const Waves = preload("res://scripts/waves.gd")
 const Gems = preload("res://scripts/gems.gd")
+const PlaytestArgs = preload("res://scripts/playtest_args.gd")
 const BADDIE_SCENE: PackedScene = preload("res://scenes/baddie.tscn")
 const GEM_SCENE: PackedScene = preload("res://scenes/gem.tscn")
 
@@ -24,10 +25,15 @@ var baddies: Array[Node2D] = []
 var loose_gems: Array[Node2D] = []
 ## Set false by tests that want to place baddies themselves.
 var waves_enabled: bool = true
+## Playtest mode (see playtest_args.gd). Read from the command line unless
+## set before the scene enters the tree.
+var mode: String = ""
 
 var _wave_wait: float = 0.0
 
 func _ready() -> void:
+	if mode == "":
+		mode = PlaytestArgs.mode(OS.get_cmdline_user_args())
 	Controls.install()
 	hero.position = Layout.HERO_START
 	camera.limit_right = Layout.WORLD_WIDTH
@@ -35,6 +41,11 @@ func _ready() -> void:
 	camera.reset_smoothing()
 	version_label.text = "v" + str(ProjectSettings.get_setting("application/config/version"))
 	_show_gems()
+	match mode:
+		"practice":
+			waves_enabled = false
+		"fight":
+			start_wave(Waves.CLOSE)
 
 func _process(delta: float) -> void:
 	_hit_baddies()
@@ -44,9 +55,10 @@ func _process(delta: float) -> void:
 		if _wave_wait >= Waves.PAUSE:
 			start_wave()
 
-func start_wave() -> void:
+func start_wave(start_dist: float = Waves.OFFSCREEN) -> void:
 	_wave_wait = 0.0
-	var points: Array[Vector2] = Waves.spawn_points(hero.position.x, Layout.WALK_AREA)
+	var points: Array[Vector2] = Waves.spawn_points(hero.position.x, Layout.WALK_AREA,
+			Waves.SIZE, start_dist)
 	for i: int in points.size():
 		spawn_baddie(points[i], Waves.lane(i))
 

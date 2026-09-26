@@ -9,13 +9,17 @@ const OFFSCREEN: float = 950.0
 const LANES: Array[float] = [-35.0, 0.0, 35.0]
 ## Seconds between beating a wave and the next one arriving.
 const PAUSE: float = 1.5
+## Playtest "fight" mode: the first wave starts this close, on screen.
+const CLOSE: float = 450.0
 
-static func spawn_points(hero_x: float, area: Rect2, count: int = SIZE) -> Array[Vector2]:
+## `start_dist` is how far from the hero the nearest one starts.
+static func spawn_points(hero_x: float, area: Rect2, count: int = SIZE,
+		start_dist: float = OFFSCREEN) -> Array[Vector2]:
 	var out: Array[Vector2] = []
 	var mid_y: float = area.get_center().y
 	for i: int in count:
 		var side: float = 1.0 if i % 2 == 0 else -1.0
-		var dist: float = OFFSCREEN + i * 60.0
+		var dist: float = start_dist + i * 60.0
 		var x: float = hero_x + side * dist
 		if x < area.position.x or x > area.end.x:
 			x = hero_x - side * dist
