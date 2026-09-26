@@ -45,7 +45,12 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
   window and saving screenshots to `captures/`, because headless can't
   render. Run with `--always-on-top`: if the window ends up behind others,
   macOS stops it drawing and every screenshot after the first is the same
-  stale frame (Project Two, 2026-09-24).
+  stale frame (Project Two, 2026-09-24). Movie maker is the easy way:
+  `--write-movie captures/x.png --fixed-fps 30 --quit-after N`, with a
+  helper scene in `tools/` to press buttons (see `tools/walk_capture.gd`).
+- **The guard matches `; open(` in shell text** (it thinks it's the macOS
+  `open` command), so a Python heredoc that opens a file gets blocked. Edit
+  files with the Edit tool instead.
 - GDScript only (never C#)
 - macOS local development
 - Git from day one, `main` branch, backed up to
@@ -203,10 +208,12 @@ so, kindly.
   needs to check.
 
 ## Current status
-Updated 2026-09-26 (v0.1.0).
-- **Phase 0 (setup) done.** An empty, runnable Godot project showing its
-  name and version, both test lanes, the hard limits, and git.
-- **Phase 1 in progress.** Charlie's first interview is done; the pitch is
-  in `docs/pitch.md` (a city fighting game with a sword and hammer, gems to
-  collect). Next: settle the open questions at the bottom of the pitch,
-  then the first touch test.
+Updated 2026-09-26 (v0.2.0).
+- **Phases 0 and 1 done.** The pitch is in `docs/pitch.md`: a belt
+  beat-'em-up in a city (like Power Rangers: Rita's Rewind), sword and
+  hammer, gems to collect, keyboard plus Xbox and Switch controllers.
+- **Phase 2, step 1 done:** a three-screen city street; the hero walks
+  left, right, up and down on keyboard, d-pad or stick, and the camera
+  follows. Controller buttons are set up in code (`scripts/controls.gd`),
+  not the editor's Input Map.
+- **Next: Phase 2, step 2**, sword and hammer.

@@ -24,10 +24,15 @@ Cartoon fighting only: bonks and swooshes, no blood, nothing scary. Baddies
 sink into the ground rather than anything grim. The game must play without
 reading: hearts and a gem counter shown as pictures and numbers.
 
-## Still to decide (Gareth and Claude, not Charlie's questions)
-- 2D or 3D, and the camera (side-on, top-down)
-- Controls a 5-year-old can manage for moving plus two weapons
-- What happens when all hearts are gone (gentle: start the fight again,
-  keep your gems?)
-- A name for the game (ask Charlie later)
-- The first touch test: the smallest fight Charlie can play
+## Gareth's decisions (2026-09-26)
+- **A side-scrolling beat-'em-up** where you can also walk up and down the
+  street (a "belt" like Streets of Rage). Charlie has played and loved
+  Power Rangers: Rita's Rewind, which is the model to follow.
+- **Controls:** keyboard, plus the Xbox and Switch controllers the family
+  already has.
+- **Out of hearts:** restart the fight, and keep your gems.
+
+## Still to decide
+- Dragons: a big boss at the end of a street, or another kind of baddie?
+  (Charlie's question, later)
+- A name for the game (ask Charlie once there's something to play)

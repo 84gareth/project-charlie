@@ -1,10 +1,17 @@
-extends Control
-## Placeholder main scene: shows the game's name and version so there is
-## something runnable from day one. Replace once we know what the game is.
+extends Node2D
+## The game: one city street with the hero on it (Phase 2, step 1).
 
-@onready var title_label: Label = %TitleLabel
+const Controls = preload("res://scripts/controls.gd")
+const Layout = preload("res://scripts/street_layout.gd")
+
+@onready var hero: Node2D = %Hero
+@onready var camera: Camera2D = %Camera
 @onready var version_label: Label = %VersionLabel
 
 func _ready() -> void:
-	title_label.text = str(ProjectSettings.get_setting("application/config/name"))
+	Controls.install()
+	hero.position = Layout.HERO_START
+	camera.limit_right = Layout.WORLD_WIDTH
+	camera.limit_bottom = Layout.SCREEN_HEIGHT
+	camera.reset_smoothing()
 	version_label.text = "v" + str(ProjectSettings.get_setting("application/config/version"))

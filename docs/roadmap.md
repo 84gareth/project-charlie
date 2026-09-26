@@ -10,15 +10,28 @@ agreed before they're added (CLAUDE.md rule 11).
 - ✅ Git repo, working rules (CLAUDE.md, docs/process.md) and hard limits
   (`.claude/`)
 
-## Phase 1: Decide the game (with Charlie)
+## Phase 1: Decide the game (with Charlie) ✅
 - ✅ Interview Charlie, one easy question at a time: who you play as, what you
   do over and over, what it looks like, what makes it fun (then Gareth and
   Claude settle 2D or 3D, controls, and winning or losing)
 - ✅ One-page pitch in `docs/pitch.md`, in Charlie's words where possible
-- Revisit project settings the answer affects (resolution, stretch mode,
-  pixel-art filtering, renderer, physics)
-- Replace this phase list with the real roadmap to a first playable
+- ✅ Project settings checked: 2D, 1600x900 and the Compatibility renderer
+  all suit a side-scrolling brawler; nothing to change
+- ✅ Gareth's decisions: belt beat-'em-up (like Power Rangers: Rita's
+  Rewind), keyboard plus Xbox and Switch controllers, out of hearts means
+  restart the fight and keep your gems
 
 ## Phase 2: The first touch test
-- The smallest version of the core idea that Charlie can actually play
+Shapes for art throughout; real art comes after Charlie says it's fun.
+1. A city street; the hero walks left, right, up and down, on keyboard or
+   an Xbox or Switch controller (v0.2.0)
+2. Sword and hammer: one button each (v0.3.0)
+3. Baddies walk in; hit one and it sinks into the ground and drops a gem;
+   pick gems up and count them (v0.4.0)
+4. Hearts: baddies hit back; out of hearts restarts the fight, gems kept
+   (v0.5.0)
+5. Pick a boy or a girl at the start (v0.6.0)
 - Gate for everything after it: Charlie plays it and says whether it's fun
+
+## After the touch test (to plan with Charlie and Gareth)
+- Dragons (boss or baddie: Charlie decides), a name, real art
