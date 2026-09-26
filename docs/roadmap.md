@@ -32,8 +32,11 @@ Shapes for art throughout; real art comes after Charlie says it's fun.
 3. ✅ Baddies walk in; hit one and it sinks into the ground and drops a
    gem; pick gems up and count them (v0.4.0). Waves of three, from just
    off-screen; two hits each; a new wave 1.5 s after the last one is beaten.
-4. Hearts: baddies hit back; out of hearts restarts the fight, gems kept
-   (v0.5.0)
+4. ✅ Hearts: baddies hit back; out of hearts restarts the fight, gems
+   kept (v0.5.0). Charlie chose 12 hearts. Baddies wind up (fist back,
+   reddish) for 0.7 s, so a punch can be dodged or stopped by hitting
+   first; 1 s safe after each hit; out of hearts the hero lies down with
+   stars for 1.5 s.
 5. Pick a boy or a girl at the start (v0.6.0)
 - Gate for everything after it: Charlie plays it and says whether it's fun
 

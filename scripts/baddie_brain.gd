@@ -1,7 +1,7 @@
 extends RefCounted
 ## How a baddie behaves, as pure numbers and maths: walk up beside the
-## hero and wait there; two hits and it sinks into the ground.
-## (Hitting back comes in Phase 2, step 4.)
+## hero, now and then wind up a punch (step away in time and it misses);
+## two hits and it sinks into the ground.
 
 ## Pixels per second; slower than the hero so Charlie can get away.
 const SPEED: Vector2 = Vector2(150.0, 110.0)
@@ -15,6 +15,22 @@ const HURT_TIME: float = 0.25
 const SINK_TIME: float = 0.8
 ## How far a hit pushes a baddie away.
 const KNOCKBACK: float = 40.0
+
+## A punch lands if the hero is this close, along and across the street.
+const PUNCH_REACH: Vector2 = Vector2(140.0, 45.0)
+## Seconds of wind-up before a punch: long enough to see it and step away.
+const WINDUP: float = 0.7
+## Seconds the punch pose shows after it's thrown.
+const PUNCH_SHOW: float = 0.2
+## Seconds between one baddie's punches.
+const COOLDOWN: float = 2.5
+## Before its first punch: this long, plus STAGGER per place in the wave,
+## so a whole wave doesn't punch together.
+const FIRST_PUNCH: float = 1.0
+const STAGGER: float = 0.8
+
+static func in_reach(me: Vector2, hero: Vector2) -> bool:
+	return absf(hero.x - me.x) <= PUNCH_REACH.x and absf(hero.y - me.y) <= PUNCH_REACH.y
 
 ## Where a baddie wants to stand: beside the hero on the side it's already
 ## on, shifted by its `lane` so a crowd doesn't stack in one spot.

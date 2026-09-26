@@ -29,6 +29,8 @@ collect the gems they leave behind.
   one to reach the final boss."
 - **Who gives gems?** Charlie picked **every baddie** (beat one, get a
   gem). Boss gems can come with the islands.
+- **How many hearts?** "12".
+- **First play (v0.4.0, fight mode):** "super fun".
 
 ## Keep it right for a 5-year-old
 Cartoon fighting only: bonks and swooshes, no blood, nothing scary. Baddies

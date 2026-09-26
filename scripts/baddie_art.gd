@@ -25,6 +25,13 @@ const PARTS: Array = [
 ]
 const HEIGHT: float = 150.0
 
+## The fist: resting at its side, pulled back while winding up (so Charlie
+## can see a punch coming), and thrown forward for the punch.
+const FIST_REST: Rect2 = Rect2(34, -78, 22, 22)
+const FIST_BACK: Rect2 = Rect2(-66, -112, 26, 26)
+const FIST_OUT: Rect2 = Rect2(38, -96, 36, 26)
+const WINDUP_TINT: Color = Color(1.0, 0.45, 0.3)
+
 ## 1 is right, -1 is left.
 var facing: int = 1:
 	set(value):
@@ -32,6 +39,8 @@ var facing: int = 1:
 		scale.x = value
 ## True while wobbling from a hit.
 var hurt: bool = false
+## "" normally, "windup" before a punch, "punch" as it's thrown.
+var pose: String = ""
 ## 0 standing, 1 all the way into the ground.
 var sink: float = 0.0
 
@@ -46,12 +55,25 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 48.0 + sink * 10.0, hole)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
-	var wobble: float = sin(Time.get_ticks_msec() * 0.06) * 6.0 if hurt else 0.0
+	var wobble: float = 0.0
+	if hurt:
+		wobble = sin(Time.get_ticks_msec() * 0.06) * 6.0
+	elif pose == "windup":
+		wobble = sin(Time.get_ticks_msec() * 0.04) * 3.0 - 6.0
+	var fist: Rect2 = FIST_REST
+	if pose == "windup":
+		fist = FIST_BACK
+	elif pose == "punch":
+		fist = FIST_OUT
 	var street: Rect2 = Rect2(-500, -500, 1000, 500)  # everything above y = 0
-	for part: Array in PARTS:
+	for part: Array in PARTS + [[fist, BODY.darkened(0.15)]]:
 		var r: Rect2 = (part[0] as Rect2)
 		r.position += Vector2(wobble, down)
 		r = r.intersection(street)
 		if r.has_area():
 			var c: Color = part[1]
-			draw_rect(r, c.lerp(Color.WHITE, 0.6) if hurt else c)
+			if hurt:
+				c = c.lerp(Color.WHITE, 0.6)
+			elif pose == "windup":
+				c = c.lerp(WINDUP_TINT, 0.35)
+			draw_rect(r, c)

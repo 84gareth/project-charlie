@@ -30,6 +30,8 @@ var moving: bool = false
 ## Which attack is happening ("" for none), and how far through it (0 to 1).
 var attack_kind: String = ""
 var attack_progress: float = 0.0
+## Knocked down: lying on the street with stars going round.
+var down: bool = false
 
 var _step_time: float = 0.0
 
@@ -40,8 +42,11 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	# Shadow on the street.
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.3))
-	draw_circle(Vector2.ZERO, 44.0, Color(0, 0, 0, 0.28))
+	draw_circle(Vector2.ZERO, 44.0 if not down else 110.0, Color(0, 0, 0, 0.28))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if down:
+		_draw_lying_down()
+		return
 
 	var spinning: bool = attack_kind == Attacks.HAMMER
 	var spin_angle: float = attack_progress * SPIN_TURNS * TAU
@@ -94,6 +99,21 @@ func _draw_sword_arm(walk_swing: float) -> void:
 	draw_line(hand + dir * 8.0 - side * 16.0, hand + dir * 8.0 + side * 16.0, GOLD, 7.0)
 	draw_line(hand + dir * 10.0, hand + dir * 100.0, BLADE, 12.0)
 	draw_circle(hand, 9.0, SKIN)
+
+## Flat on the street, head to the back, with dizzy stars circling.
+func _draw_lying_down() -> void:
+	# Turned a quarter: feet to the front, head to the back, centred.
+	draw_set_transform(Vector2(100.0, -30.0), -PI / 2.0, Vector2.ONE)
+	draw_rect(Rect2(-20.0, -64.0, 16.0, 58.0), TROUSERS)
+	draw_rect(Rect2(4.0, -64.0, 16.0, 58.0), TROUSERS)
+	draw_rect(Rect2(-28.0, -138.0, 56.0, 78.0), SHIRT)
+	draw_circle(Vector2(0.0, -168.0), 30.0, SKIN)
+	draw_rect(Rect2(-32.0, -202.0, 58.0, 20.0), HAIR)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var t: float = Time.get_ticks_msec() * 0.004
+	for i: int in 3:
+		var a: float = t + i * TAU / 3.0
+		draw_circle(Vector2(-68.0 + cos(a) * 40.0, -80.0 + sin(a) * 12.0), 8.0, GOLD)
 
 func _draw_hammer_on_back() -> void:
 	draw_line(Vector2(-20.0, -70.0), Vector2(-44.0, -170.0), GRIP, 9.0)

@@ -203,6 +203,10 @@ fun to play again and again. If you catch us doing that, push back and say
 so, kindly.
 
 ## Project landmines (things that have bitten us — check before repeating)
+- **Don't pipe a windowed Godot run into `head`.** It closes the pipe and
+  kills Godot mid-recording. Send output to a file or `/dev/null`.
+- **`sips --cropOffset 0 0` is ignored** (it crops from the centre). To
+  look at the HUD corner, read the full frame.
 - **Both test runners trap SCRIPT and SHADER errors; keep it.** GDScript has
   no exceptions, so without `tests/framework/script_error_trap.gd` a test
   that crashes partway prints PASS.
@@ -219,7 +223,7 @@ so, kindly.
   needs to check.
 
 ## Current status
-Updated 2026-09-26 (v0.4.0).
+Updated 2026-09-26 (v0.5.0).
 - **Phases 0 and 1 done.** The pitch is in `docs/pitch.md`: a belt
   beat-'em-up in a city (like Power Rangers: Rita's Rewind), sword and
   hammer, gems to collect, keyboard plus Xbox and Switch controllers.
@@ -238,4 +242,10 @@ Updated 2026-09-26 (v0.4.0).
   onto gems to count them (top-left counter). Numbers in
   `scripts/baddie_brain.gd`, `scripts/waves.gd`, `scripts/gems.gd`; `main.gd`
   runs the fight. Charlie chose: every baddie gives a gem.
-- **Next: Phase 2, step 4**, hearts: baddies hit back.
+- **Charlie played v0.4.0 (fight mode): "super fun".**
+- **Phase 2, step 4 done:** 12 hearts (Charlie's number, two rows under
+  the gem counter); baddies wind up and punch; out of hearts the hero
+  lies down, this fight's baddies go, hearts refill, gems kept, and a new
+  wave comes. Hearts and gems live in `scripts/fight_state.gd`
+  (`main.fight`).
+- **Next: Phase 2, step 5**, pick a boy or a girl at the start.

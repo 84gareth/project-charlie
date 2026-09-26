@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/street_art.gd" id="2_street"]
 [ext_resource type="PackedScene" path="res://scenes/hero.tscn" id="3_hero"]
 [ext_resource type="Script" path="res://scripts/gem_art.gd" id="4_gem"]
+[ext_resource type="Script" path="res://scripts/hearts_art.gd" id="5_hearts"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -62,3 +63,8 @@ theme_override_constants/outline_size = 12
 theme_override_font_sizes/font_size = 60
 text = "0"
 vertical_alignment = 1
+
+[node name="Hearts" type="Node2D" parent="HUD"]
+unique_name_in_owner = true
+position = Vector2(46, 132)
+script = ExtResource("5_hearts")
