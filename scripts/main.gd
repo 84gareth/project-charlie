@@ -12,7 +12,9 @@ const Waves = preload("res://scripts/waves.gd")
 const Gems = preload("res://scripts/gems.gd")
 const FightState = preload("res://scripts/fight_state.gd")
 const PlaytestArgs = preload("res://scripts/playtest_args.gd")
+const Helpers = preload("res://scripts/helpers.gd")
 const BADDIE_SCENE: PackedScene = preload("res://scenes/baddie.tscn")
+const HELPER_SCENE: PackedScene = preload("res://scenes/helper.tscn")
 const GEM_SCENE: PackedScene = preload("res://scenes/gem.tscn")
 
 ## Seconds the hero lies down after running out of hearts.
@@ -31,6 +33,8 @@ var fight := FightState.new()
 var baddies: Array[Node2D] = []
 ## Gems lying on the street, waiting to be picked up.
 var loose_gems: Array[Node2D] = []
+## Charlie's helpers that have joined, in level order.
+var helpers: Array[Node2D] = []
 ## Set false by tests that want to place baddies themselves.
 var waves_enabled: bool = true
 ## Playtest mode (see playtest_args.gd). Read from the command line unless
@@ -69,6 +73,27 @@ func _ready() -> void:
 			waves_enabled = false
 		"fight":
 			start_wave(Waves.CLOSE)
+		"helpers":
+			set_gems(Helpers.UNLOCK["green"])
+			start_wave(Waves.CLOSE)
+
+## Sets the gem total directly (playtesting and tests); any helpers the
+## new total earns join straight away.
+func set_gems(total: int) -> void:
+	var before: int = fight.gems
+	fight.gems = total
+	_helpers_join(before)
+	_show_score()
+
+func _helpers_join(gems_before: int) -> void:
+	for kind: String in Helpers.newly_unlocked(gems_before, fight.gems):
+		var h: Node2D = HELPER_SCENE.instantiate()
+		h.kind = kind
+		h.index = helpers.size()
+		h.hero = hero
+		h.position = Helpers.follow_spot(hero.position, hero.facing, h.index, Layout.WALK_AREA)
+		world.add_child(h)
+		helpers.append(h)
 
 func _on_hero_picked(look: String) -> void:
 	_use_look(look)
@@ -162,7 +187,9 @@ func _pick_up_gems() -> void:
 		if Gems.touching(hero.position, gem.position):
 			loose_gems.erase(gem)
 			gem.queue_free()
+			var before: int = fight.gems
 			fight.add_gem()
+			_helpers_join(before)
 			_show_score()
 
 func _show_score() -> void:

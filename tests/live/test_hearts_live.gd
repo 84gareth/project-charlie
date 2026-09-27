@@ -62,8 +62,8 @@ func test_out_of_hearts_restarts_the_fight_and_keeps_gems() -> void:
 	assert_eq(_main.baddies.size(), 0, "this fight's baddies go away")
 	await until(func() -> bool: return not _hero.down, "hero gets back up")
 	assert_eq(_main.fight.hearts, FightState.MAX_HEARTS, "full hearts")
-	assert_eq(_main.fight.gems, 7, "gems kept")
-	assert_eq(_main.get_node("%GemLabel").text, "7", "counter still shows them")
+	assert_eq(_main.fight.gems, 7 * FightState.GEM_VALUE, "gems kept")
+	assert_eq(_main.get_node("%GemLabel").text, str(7 * FightState.GEM_VALUE), "counter still shows them")
 	await until(func() -> bool: return _main.baddies.size() == Waves.SIZE, "the fight starts again")
 
 func test_no_walking_or_attacking_while_down() -> void:

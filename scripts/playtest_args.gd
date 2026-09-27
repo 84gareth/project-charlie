@@ -4,10 +4,11 @@ extends RefCounted
 ##   street    the normal game (the default), starting at the hero picker
 ##   practice  no baddies: try walking, the sword and the hammer
 ##   fight     the first wave arrives straight away, close by
-## --hero=boy|girl skips the picker (practice and fight skip it anyway,
-## as the boy unless told otherwise).
+##   helpers   start with 700 gems (all three helpers), then a close wave
+## --hero=boy|girl skips the picker (every mode but street skips it
+## anyway, as the boy unless told otherwise).
 
-const MODES: Array[String] = ["street", "practice", "fight"]
+const MODES: Array[String] = ["street", "practice", "fight", "helpers"]
 const DEFAULT: String = "street"
 const LOOKS: Array[String] = ["boy", "girl"]
 

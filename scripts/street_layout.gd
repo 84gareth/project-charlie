@@ -13,4 +13,4 @@ const ROAD_TOP: float = 720.0
 ## Where the hero's feet may go: the pavement and the road.
 const WALK_AREA: Rect2 = Rect2(80.0, 600.0, WORLD_WIDTH - 160.0, 270.0)
 
-const HERO_START: Vector2 = Vector2(300.0, 730.0)
+const HERO_START: Vector2 = Vector2(420.0, 730.0)

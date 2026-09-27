@@ -76,8 +76,8 @@ func test_two_hits_sink_it_and_leave_a_gem_to_pick_up() -> void:
 	assert_eq(_main.fight.gems, 0, "not picked up yet")
 	var gem: Node2D = _main.loose_gems[0]
 	_hero.position = gem.position
-	await until(func() -> bool: return _main.fight.gems == 1, "gem counted")
-	assert_eq(_main.get_node("%GemLabel").text, "1", "counter shows it")
+	await until(func() -> bool: return _main.fight.gems == 10, "gem counted, worth 10")
+	assert_eq(_main.get_node("%GemLabel").text, "10", "counter shows it")
 	assert_eq(_main.loose_gems.size(), 0, "gem gone from the street")
 
 func test_beating_a_wave_brings_the_next() -> void:

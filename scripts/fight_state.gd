@@ -4,6 +4,9 @@ extends RefCounted
 ## your gems (Gareth's decision).
 
 const MAX_HEARTS: int = 12
+## Each gem picked up adds this much (Gareth: 10, so Charlie's helpers at
+## 200, 500 and 700 gems come within a sitting).
+const GEM_VALUE: int = 10
 ## Seconds after a hit when nothing can hurt you again, so a crowd can't
 ## take several hearts at once.
 const SAFE_TIME: float = 1.0
@@ -31,7 +34,7 @@ func out_of_hearts() -> bool:
 	return hearts <= 0
 
 func add_gem() -> void:
-	gems += 1
+	gems += GEM_VALUE
 
 ## Hearts back to full; gems kept.
 func restart_fight() -> void:

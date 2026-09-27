@@ -5,9 +5,10 @@
 #   street     the normal game (default): pick a boy or a girl first
 #   practice   no baddies: try walking, the sword and the hammer
 #   fight      the first wave of baddies turns up straight away, close by
+#   helpers    start with 700 gems, so all three helpers, then a close wave
 #   editor     open the project in the Godot editor instead
 #   boy, girl  skip the pick screen and play as that hero
-#              (practice and fight skip it anyway, as the boy by default)
+#              (every mode but street skips it, as the boy by default)
 #
 # Controls: arrows or WASD to walk, Z or Space for the sword, X for the
 # hammer. Controllers: stick or d-pad to walk, bottom/right buttons for the
@@ -24,11 +25,11 @@ HERO=""
 EXTRA=()
 while [ $# -gt 0 ]; do
   case "$1" in
-    street|practice|fight|editor) MODE="$1" ;;
+    street|practice|fight|helpers|editor) MODE="$1" ;;
     boy|girl) HERO="$1" ;;
-    -h|--help) sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     --) shift; EXTRA=("$@"); break ;;
-    *) echo "Unknown option: $1  (try: street, practice, fight, editor, boy, girl)"; exit 2 ;;
+    *) echo "Unknown option: $1  (try: street, practice, fight, helpers, editor, boy, girl)"; exit 2 ;;
   esac
   shift
 done

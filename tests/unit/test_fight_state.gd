@@ -10,6 +10,13 @@ func test_starts_with_twelve_hearts_and_no_gems() -> void:
 	assert_eq(f.hearts, 12)
 	assert_eq(f.gems, 0)
 
+func test_each_gem_is_worth_ten() -> void:
+	var f := FightState.new()
+	f.add_gem()
+	assert_eq(f.gems, 10, "Gareth's number")
+	f.add_gem()
+	assert_eq(f.gems, 20)
+
 func test_a_punch_costs_one_heart() -> void:
 	var f := FightState.new()
 	assert_true(f.take_hit())
@@ -45,5 +52,5 @@ func test_restart_fills_hearts_and_keeps_gems() -> void:
 		f.update(FightState.SAFE_TIME + 0.01)
 	f.restart_fight()
 	assert_eq(f.hearts, FightState.MAX_HEARTS, "full hearts")
-	assert_eq(f.gems, 5, "gems kept")
+	assert_eq(f.gems, 5 * FightState.GEM_VALUE, "gems kept")
 	assert_true(f.is_safe(), "a moment to get ready")
