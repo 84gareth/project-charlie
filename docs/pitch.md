@@ -36,6 +36,20 @@ collect the gems they leave behind.
 - **Helpers (2026-09-27):** creatures "that help you in battle (like
   Pokemon type creatures)". Charlie wants to draw them himself. What do
   they do? They **attack** and **give you hearts**.
+- **The three helpers (drawn 2026-09-27, `drawings/helpers_all.png`):**
+  level 1 to 3, left to right. "You need to get different amount of gems
+  to get them. 200, 500 and 700. They use their powers to defeat the
+  enemies." Colours: level 1 **blue**, level 2 **yellow**, level 3
+  **green**.
+  - Level 1 (`drawings/helper1_blue.png`): a round egg-shaped body with a
+    smiley face, a curl of hair, little round arms and two feet.
+  - Level 2 (`drawings/helper2_yellow.png`): a round face, stick arms and
+    legs, and a tall zig-zag lightning shape on its head.
+  - Level 3 (`drawings/helper3_green.png`): arms up high, legs wide, a
+    beard, and a big scribbly shape all around it.
+  - To check later: is it "reach 200 gems" or "spend 200 gems"? And gems
+    come one per baddie today, so 200 is about 67 waves. Gems per baddie
+    may need to go up.
 - **First play (v0.4.0, fight mode):** "super fun".
 
 ## Keep it right for a 5-year-old
