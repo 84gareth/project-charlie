@@ -33,6 +33,14 @@ func is_safe() -> bool:
 func out_of_hearts() -> bool:
 	return hearts <= 0
 
+## A helper gives a heart. True if it helped (false when already full or
+## out of hearts).
+func heal() -> bool:
+	if hearts <= 0 or hearts >= MAX_HEARTS:
+		return false
+	hearts += 1
+	return true
+
 func add_gem() -> void:
 	gems += GEM_VALUE
 

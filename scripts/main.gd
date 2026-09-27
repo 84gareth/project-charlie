@@ -13,8 +13,11 @@ const Gems = preload("res://scripts/gems.gd")
 const FightState = preload("res://scripts/fight_state.gd")
 const PlaytestArgs = preload("res://scripts/playtest_args.gd")
 const Helpers = preload("res://scripts/helpers.gd")
+const Powers = preload("res://scripts/helper_powers.gd")
 const BADDIE_SCENE: PackedScene = preload("res://scenes/baddie.tscn")
 const HELPER_SCENE: PackedScene = preload("res://scenes/helper.tscn")
+const WAVE_SCENE: PackedScene = preload("res://scenes/wave.tscn")
+const HEART_POP_SCENE: PackedScene = preload("res://scenes/heart_pop.tscn")
 const GEM_SCENE: PackedScene = preload("res://scenes/gem.tscn")
 
 ## Seconds the hero lies down after running out of hearts.
@@ -35,6 +38,8 @@ var baddies: Array[Node2D] = []
 var loose_gems: Array[Node2D] = []
 ## Charlie's helpers that have joined, in level order.
 var helpers: Array[Node2D] = []
+## The blue helper's waves still rolling.
+var waves: Array[Node2D] = []
 ## Set false by tests that want to place baddies themselves.
 var waves_enabled: bool = true
 ## Playtest mode (see playtest_args.gd). Read from the command line unless
@@ -48,6 +53,9 @@ var picking: bool = false
 
 var _wave_wait: float = 0.0
 var _down_left: float = 0.0
+## Helper powers count down from -1, so they never clash with the hero's
+## attack numbers (which count up from 1).
+var _helper_attack: int = 0
 
 func _ready() -> void:
 	if mode == "":
@@ -92,8 +100,67 @@ func _helpers_join(gems_before: int) -> void:
 		h.index = helpers.size()
 		h.hero = hero
 		h.position = Helpers.follow_spot(hero.position, hero.facing, h.index, Layout.WALK_AREA)
+		h.made_wave.connect(_on_helper_wave)
+		h.bonked.connect(_on_helper_bonk)
+		h.wants_to_heal.connect(_on_helper_heal)
 		world.add_child(h)
 		helpers.append(h)
+
+func _new_helper_attack() -> int:
+	_helper_attack -= 1
+	return _helper_attack
+
+## Each helper that's ready goes for the nearest baddie near the hero.
+func _use_helper_powers() -> void:
+	var targets: Array[Node2D] = []
+	var spots: Array[Vector2] = []
+	for b: Node2D in baddies:
+		if b.alive():
+			targets.append(b)
+			spots.append(b.position)
+	if targets.is_empty():
+		return
+	for h: Node2D in helpers:
+		if h.ready_for_power():
+			var i: int = Powers.pick_target(hero.position, spots)
+			if i >= 0:
+				h.use_power(targets[i])
+
+func _on_helper_wave(_h: Node2D, at: Vector2, dir: int) -> void:
+	var w: Node2D = WAVE_SCENE.instantiate()
+	w.dir = dir
+	w.attack_id = _new_helper_attack()
+	w.position = at
+	world.add_child(w)
+	waves.append(w)
+
+func _roll_waves() -> void:
+	# Drop finished waves first. Read them untyped: putting a freed wave into
+	# a typed loop variable is an error, which would stop every later wave.
+	var rolling: Array[Node2D] = []
+	for i: int in waves.size():
+		var maybe: Variant = waves[i]
+		if is_instance_valid(maybe) and not (maybe as Node2D).is_queued_for_deletion():
+			rolling.append(maybe)
+	waves = rolling
+	for w: Node2D in waves:
+		for b: Node2D in baddies:
+			if b.alive() and Powers.wave_hits(w.prev_x, w.position.x, w.position.y, b.position):
+				# Knocked the way the wave is rolling.
+				b.take_hit(Powers.DAMAGE["blue"], w.attack_id, b.position.x - w.dir)
+
+func _on_helper_bonk(h: Node2D, target: Node2D, damage: int) -> void:
+	if is_instance_valid(target) and target.alive():
+		target.take_hit(damage, _new_helper_attack(), h.position.x)
+
+func _on_helper_heal(h: Node2D) -> void:
+	if picking or hero.down or not fight.heal():
+		return
+	h.heal_wait = Powers.HEAL_EVERY
+	var pop: Node2D = HEART_POP_SCENE.instantiate()
+	pop.position = h.position + Vector2(0, -170)
+	world.add_child(pop)
+	_show_score()
 
 func _on_hero_picked(look: String) -> void:
 	_use_look(look)
@@ -117,6 +184,8 @@ func _process(delta: float) -> void:
 			_get_back_up()
 		return
 	_hit_baddies()
+	_use_helper_powers()
+	_roll_waves()
 	_pick_up_gems()
 	if waves_enabled and baddies.is_empty():
 		_wave_wait += delta
@@ -167,6 +236,10 @@ func _fall_down() -> void:
 	for b: Node2D in baddies:
 		b.queue_free()
 	baddies.clear()
+	for w: Node2D in waves:
+		if is_instance_valid(w):
+			w.queue_free()
+	waves.clear()
 	_wave_wait = 0.0
 
 ## Up again with full hearts and every gem kept; the fight starts over.

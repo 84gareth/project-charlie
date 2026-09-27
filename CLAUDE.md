@@ -120,8 +120,9 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
       cd "/Users/gareth/Projects/Project Charlie" && tools/playtest.sh fight
       ```
       Modes: `street` (normal game, from the pick screen), `practice`
-      (no baddies), `fight` (a wave straight away), `editor`; add `boy`
-      or `girl` to skip the pick screen. Add a mode to the launcher (and
+      (no baddies), `fight` (a wave straight away), `helpers` (700 gems,
+      all three helpers, a wave straight away), `editor`; add `boy` or
+      `girl` to skip the pick screen. Add a mode to the launcher (and
       `scripts/playtest_args.gd`) when a new screen or mode needs one.
 11. **Work the roadmap in order; don't silently insert.** `docs/roadmap.md` is
     the single ordered list. When something new comes up, propose where it
@@ -205,6 +206,10 @@ fun to play again and again. If you catch us doing that, push back and say
 so, kindly.
 
 ## Project landmines (things that have bitten us — check before repeating)
+- **Never put a freed node into a typed variable** (e.g. `for w: Node2D
+  in list` when the list may hold freed nodes): it's a script error that
+  stops the whole function every frame. Read the list untyped and check
+  `is_instance_valid` first (`main.gd` `_roll_waves`).
 - **Don't pipe a windowed Godot run into `head`.** It closes the pipe and
   kills Godot mid-recording. Send output to a file or `/dev/null`.
 - **`sips --cropOffset 0 0` is ignored** (it crops from the centre). To
@@ -225,7 +230,7 @@ so, kindly.
   needs to check.
 
 ## Current status
-Updated 2026-09-27 (v0.6.0).
+Updated 2026-09-27 (v0.8.0).
 - **Phases 0 and 1 done.** The pitch is in `docs/pitch.md`: a belt
   beat-'em-up in a city (like Power Rangers: Rita's Rewind), sword and
   hammer, gems to collect, keyboard plus Xbox and Switch controllers.
@@ -255,6 +260,15 @@ Updated 2026-09-27 (v0.6.0).
   `hero_look` before adding the main scene; `tools/playtest.sh` takes
   `boy` or `girl` to skip it too.
 - **Phase 2 gate passed** (v0.6.0, 2026-09-27): "It's great."
-- **Next: Charlie's own drawings as the game's art.** Photos go in
-  `drawings/` (raw, not imported by Godot); cleaned-up versions go in
-  `assets/`. Then plan the rest of "after the touch test" with them.
+- **Phase 3 (helpers) built, v0.8.0.** Charlie's three drawings went
+  Gemini (Gareth, web UI) → Meshy (`meshy-job`, symlinked from Project
+  2126; `MESHY_API_KEY` is in the environment; EVERY job costs credits,
+  so ask before re-rolling) → `tools/helper_sprite.py` (headless Blender)
+  → `assets/helpers/`. Gems are worth 10; helpers join at 200/500/700 and
+  all follow you. Powers: blue wave, yellow sneak-and-bonk, green swoop
+  (2 damage). Each gives a heart at most every 15 s. Numbers live in
+  `scripts/helpers.gd` and `scripts/helper_powers.gd`. Playtest with
+  `tools/playtest.sh helpers`.
+- **Next: the Phase 3 gate.** Charlie plays with his helpers. Photos of
+  drawings go in `drawings/` (raw, not imported by Godot); finished art
+  goes in `assets/`.

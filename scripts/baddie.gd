@@ -25,8 +25,9 @@ var walk_area: Rect2 = Layout.WALK_AREA
 var punch_wait: float = Brain.FIRST_PUNCH
 
 var _timer: float = 0.0
-## One swing or spin hits a baddie once, however long it lasts.
-var _last_hit_attack: int = -1
+## Every attack that has hit it: one swing, spin, wave or bonk hits a
+## baddie once, however long it lasts, even if another lands meanwhile.
+var _hit_by: Dictionary = {}
 
 func alive() -> bool:
 	return state != State.SINK
@@ -34,9 +35,9 @@ func alive() -> bool:
 ## Hit by attack number `attack_id`, from someone standing at `from_x`.
 ## True if it counted.
 func take_hit(damage: int, attack_id: int, from_x: float) -> bool:
-	if not alive() or attack_id == _last_hit_attack:
+	if not alive() or _hit_by.has(attack_id):
 		return false
-	_last_hit_attack = attack_id
+	_hit_by[attack_id] = true
 	hp -= damage
 	position.x = clampf(position.x + signf(position.x - from_x) * Brain.KNOCKBACK,
 			walk_area.position.x, walk_area.end.x)
