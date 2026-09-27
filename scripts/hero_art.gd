@@ -15,6 +15,7 @@ const GRIP: Color = Color(0.45, 0.28, 0.12)
 const GOLD: Color = Color(0.95, 0.75, 0.2)
 const HAMMER_HEAD: Color = Color(0.45, 0.47, 0.52)
 const SWOOSH: Color = Color(1, 1, 1, 0.55)
+const BOBBLE: Color = Color(0.98, 0.35, 0.65)
 
 ## Where the spinning hammer circles, around the hero's middle.
 const SPIN_CENTRE: Vector2 = Vector2(0.0, -95.0)
@@ -32,6 +33,11 @@ var attack_kind: String = ""
 var attack_progress: float = 0.0
 ## Knocked down: lying on the street with stars going round.
 var down: bool = false
+## "boy" or "girl", picked at the start.
+@export var look: String = "boy":
+	set(value):
+		look = value
+		queue_redraw()
 
 var _step_time: float = 0.0
 
@@ -67,7 +73,7 @@ func _draw() -> void:
 	draw_rect(Rect2(-28.0, -138.0, 56.0, 78.0), SHIRT)
 	# Head, hair and eye.
 	draw_circle(Vector2(0.0, -168.0), 30.0, SKIN)
-	draw_rect(Rect2(-32.0, -202.0, 58.0, 20.0), HAIR)
+	_draw_hair()
 	draw_circle(Vector2(14.0, -172.0), 4.5, Color.BLACK)
 
 	if spinning:
@@ -75,6 +81,18 @@ func _draw() -> void:
 			_draw_spinning_hammer(spin_angle)
 	else:
 		_draw_sword_arm(swing)
+
+## Short hair for the boy; for the girl, Charlie's two pigtails, one each
+## side, with pink bobbles.
+func _draw_hair() -> void:
+	draw_rect(Rect2(-32.0, -202.0, 58.0, 20.0), HAIR)
+	if look != "girl":
+		return
+	for side: float in [-1.0, 1.0]:
+		var bobble: Vector2 = Vector2(side * 33.0, -186.0)
+		draw_circle(bobble + Vector2(side * 16.0, 14.0), 15.0, HAIR)
+		draw_circle(bobble + Vector2(side * 20.0, 34.0), 11.0, HAIR)
+		draw_circle(bobble, 7.0, BOBBLE)
 
 ## The arm holding the sword. Idle, the sword points up and forward; a
 ## sword attack sweeps it from over the shoulder down to the front.
@@ -108,7 +126,7 @@ func _draw_lying_down() -> void:
 	draw_rect(Rect2(4.0, -64.0, 16.0, 58.0), TROUSERS)
 	draw_rect(Rect2(-28.0, -138.0, 56.0, 78.0), SHIRT)
 	draw_circle(Vector2(0.0, -168.0), 30.0, SKIN)
-	draw_rect(Rect2(-32.0, -202.0, 58.0, 20.0), HAIR)
+	_draw_hair()
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var t: float = Time.get_ticks_msec() * 0.004
 	for i: int in 3:

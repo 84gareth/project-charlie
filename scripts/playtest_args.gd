@@ -1,16 +1,27 @@
 extends RefCounted
-## Reads the playtest mode from the command line, as tools/playtest.sh
-## passes it after Godot's `--`:  --mode=practice
-##   street    the normal game (the default)
+## Reads playtest options from the command line, as tools/playtest.sh
+## passes them after Godot's `--`:  --mode=fight --hero=girl
+##   street    the normal game (the default), starting at the hero picker
 ##   practice  no baddies: try walking, the sword and the hammer
 ##   fight     the first wave arrives straight away, close by
+## --hero=boy|girl skips the picker (practice and fight skip it anyway,
+## as the boy unless told otherwise).
 
 const MODES: Array[String] = ["street", "practice", "fight"]
 const DEFAULT: String = "street"
+const LOOKS: Array[String] = ["boy", "girl"]
 
 static func mode(args: PackedStringArray) -> String:
+	var m: String = _value(args, "--mode=")
+	return m if MODES.has(m) else DEFAULT
+
+## "boy" or "girl" if asked for, otherwise "".
+static func hero(args: PackedStringArray) -> String:
+	var h: String = _value(args, "--hero=")
+	return h if LOOKS.has(h) else ""
+
+static func _value(args: PackedStringArray, prefix: String) -> String:
 	for arg: String in args:
-		if arg.begins_with("--mode="):
-			var m: String = arg.trim_prefix("--mode=")
-			return m if MODES.has(m) else DEFAULT
-	return DEFAULT
+		if arg.begins_with(prefix):
+			return arg.trim_prefix(prefix)
+	return ""

@@ -37,7 +37,9 @@ Shapes for art throughout; real art comes after Charlie says it's fun.
    reddish) for 0.7 s, so a punch can be dodged or stopped by hitting
    first; 1 s safe after each hit; out of hearts the hero lies down with
    stars for 1.5 s.
-5. Pick a boy or a girl at the start (v0.6.0)
+5. ✅ Pick a boy or a girl at the start (v0.6.0). Two big cards, no
+   reading; arrows/d-pad/stick to choose, any attack button, Enter or a
+   click to pick. The girl has Charlie's two pigtails.
 - Gate for everything after it: Charlie plays it and says whether it's fun
 
 ## After the touch test (to plan with Charlie and Gareth)

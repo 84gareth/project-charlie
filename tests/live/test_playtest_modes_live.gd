@@ -12,6 +12,7 @@ func after_each() -> void:
 
 func _start(mode: String) -> void:
 	_main = load("res://scenes/main.tscn").instantiate()
+	_main.hero_look = "boy"
 	_main.mode = mode
 	add_child(_main)
 	await frames(1)

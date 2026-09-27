@@ -1,8 +1,8 @@
 extends Node2D
-## The game: one city street, the hero, and waves of baddies that punch
-## back and each leave a gem behind (Phase 2, step 4). Beat a wave and
-## another comes. Out of hearts: the hero falls down, the fight restarts
-## with full hearts, and the gems are kept.
+## The game: pick a boy or a girl, then one city street, the hero, and
+## waves of baddies that punch back and each leave a gem behind (Phase 2).
+## Beat a wave and another comes. Out of hearts: the hero falls down, the
+## fight restarts with full hearts, and the gems are kept.
 
 const Controls = preload("res://scripts/controls.gd")
 const Layout = preload("res://scripts/street_layout.gd")
@@ -24,6 +24,7 @@ const DOWN_TIME: float = 1.5
 @onready var version_label: Label = %VersionLabel
 @onready var gem_label: Label = %GemLabel
 @onready var hearts_art: Node2D = %Hearts
+@onready var picker: CanvasLayer = $HeroPicker
 
 var fight := FightState.new()
 ## Baddies still on the street, including ones sinking.
@@ -35,6 +36,11 @@ var waves_enabled: bool = true
 ## Playtest mode (see playtest_args.gd). Read from the command line unless
 ## set before the scene enters the tree.
 var mode: String = ""
+## "boy" or "girl". If still "" at the start (not set by a test or
+## --hero=), the street mode shows the picker; other modes use the boy.
+var hero_look: String = ""
+## True while the start screen is up: no fighting yet.
+var picking: bool = false
 
 var _wave_wait: float = 0.0
 var _down_left: float = 0.0
@@ -50,13 +56,34 @@ func _ready() -> void:
 	version_label.text = "v" + str(ProjectSettings.get_setting("application/config/version"))
 	hearts_art.max_hearts = FightState.MAX_HEARTS
 	_show_score()
+	if hero_look == "":
+		hero_look = PlaytestArgs.hero(OS.get_cmdline_user_args())
+	if hero_look == "" and mode == "street":
+		picking = true
+		hero.controls_on = false
+		picker.get_node("%Board").picked.connect(_on_hero_picked)
+	else:
+		_use_look(hero_look if hero_look != "" else "boy")
 	match mode:
 		"practice":
 			waves_enabled = false
 		"fight":
 			start_wave(Waves.CLOSE)
 
+func _on_hero_picked(look: String) -> void:
+	_use_look(look)
+	picking = false
+	hero.controls_on = true
+
+func _use_look(look: String) -> void:
+	hero_look = look
+	hero.art.look = look
+	if is_instance_valid(picker):
+		picker.queue_free()
+
 func _process(delta: float) -> void:
+	if picking:
+		return
 	fight.update(delta)
 	hero.blinking = fight.is_safe() and not hero.down
 	if hero.down:

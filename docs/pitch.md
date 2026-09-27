@@ -30,6 +30,7 @@ collect the gems they leave behind.
 - **Who gives gems?** Charlie picked **every baddie** (beat one, get a
   gem). Boss gems can come with the islands.
 - **How many hearts?** "12".
+- **The girl hero's hair:** two pigtails.
 - **First play (v0.4.0, fight mode):** "super fun".
 
 ## Keep it right for a 5-year-old

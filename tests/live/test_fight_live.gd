@@ -11,6 +11,7 @@ var _hero: Node2D
 
 func before_each() -> void:
 	_main = load("res://scenes/main.tscn").instantiate()
+	_main.hero_look = "boy"
 	add_child(_main)
 	await frames(1)
 	_hero = _main.get_node("%Hero")

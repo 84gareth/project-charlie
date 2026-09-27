@@ -118,8 +118,9 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
       ```bash
       cd "/Users/gareth/Projects/Project Charlie" && tools/playtest.sh fight
       ```
-      Modes: `street` (normal game), `practice` (no baddies), `fight`
-      (a wave straight away), `editor`. Add a mode to the launcher (and
+      Modes: `street` (normal game, from the pick screen), `practice`
+      (no baddies), `fight` (a wave straight away), `editor`; add `boy`
+      or `girl` to skip the pick screen. Add a mode to the launcher (and
       `scripts/playtest_args.gd`) when a new screen or mode needs one.
 11. **Work the roadmap in order; don't silently insert.** `docs/roadmap.md` is
     the single ordered list. When something new comes up, propose where it
@@ -223,7 +224,7 @@ so, kindly.
   needs to check.
 
 ## Current status
-Updated 2026-09-26 (v0.5.0).
+Updated 2026-09-27 (v0.6.0).
 - **Phases 0 and 1 done.** The pitch is in `docs/pitch.md`: a belt
   beat-'em-up in a city (like Power Rangers: Rita's Rewind), sword and
   hammer, gems to collect, keyboard plus Xbox and Switch controllers.
@@ -248,4 +249,10 @@ Updated 2026-09-26 (v0.5.0).
   lies down, this fight's baddies go, hearts refill, gems kept, and a new
   wave comes. Hearts and gems live in `scripts/fight_state.gd`
   (`main.fight`).
-- **Next: Phase 2, step 5**, pick a boy or a girl at the start.
+- **Phase 2, step 5 done:** the street mode opens on a pick screen (boy
+  or girl with two pigtails, Charlie's choice). Tests skip it by setting
+  `hero_look` before adding the main scene; `tools/playtest.sh` takes
+  `boy` or `girl` to skip it too.
+- **Next: the Phase 2 gate.** Charlie plays the whole thing from the pick
+  screen and says whether it's fun. Then plan what's after the touch test
+  with Charlie and Gareth.

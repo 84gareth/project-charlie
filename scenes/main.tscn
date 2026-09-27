@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/street_art.gd" id="2_street"]
 [ext_resource type="PackedScene" path="res://scenes/hero.tscn" id="3_hero"]
 [ext_resource type="Script" path="res://scripts/gem_art.gd" id="4_gem"]
 [ext_resource type="Script" path="res://scripts/hearts_art.gd" id="5_hearts"]
+[ext_resource type="PackedScene" path="res://scenes/hero_picker.tscn" id="6_picker"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -68,3 +69,5 @@ vertical_alignment = 1
 unique_name_in_owner = true
 position = Vector2(46, 132)
 script = ExtResource("5_hearts")
+
+[node name="HeroPicker" parent="." instance=ExtResource("6_picker")]

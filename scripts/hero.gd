@@ -26,9 +26,11 @@ var attack_id: int = 0
 var blinking: bool = false
 ## True while knocked down: no walking or attacking.
 var down: bool = false
+## False while the start screen is up: no walking or attacking.
+var controls_on: bool = true
 
 func _unhandled_input(event: InputEvent) -> void:
-	if down:
+	if down or not controls_on:
 		return
 	if event.is_action_pressed("sword"):
 		_start_attack(Attacks.SWORD)
@@ -50,7 +52,7 @@ func bumped(from_x: float) -> void:
 func _process(delta: float) -> void:
 	attack.update(delta)
 	var dir: Vector2 = Vector2.ZERO
-	if not attack.busy() and not down:
+	if not attack.busy() and not down and controls_on:
 		dir = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	position = Walk.step(position, dir, delta, walk_area)
 	facing = Walk.facing(facing, dir.x)

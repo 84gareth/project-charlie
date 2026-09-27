@@ -13,6 +13,7 @@ func after_each() -> void:
 func test_main_scene_shows_street_hero_and_version() -> void:
 	var path: String = str(ProjectSettings.get_setting("application/run/main_scene"))
 	_main = load(path).instantiate()
+	_main.hero_look = "boy"
 	add_child(_main)
 	await frames(1)
 	var version: String = str(ProjectSettings.get_setting("application/config/version"))
