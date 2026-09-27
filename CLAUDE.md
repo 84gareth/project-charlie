@@ -110,11 +110,12 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
       4. **What's next**
       5. **Model and effort level required**, e.g. `Opus 5.5 · high`.
     - Never use the phrase "load-bearing". Say the actual thing.
-    - **Something to test? End with a launch block** (Gareth, 2026-09-26):
-      when an update leaves anything for Gareth or Charlie to try, the very
-      end of the message is a `bash` code block that cds into this folder
-      and runs `tools/playtest.sh` with the mode that shows the new thing,
-      so the Run button starts it. After the five headings, nothing after:
+    - **EVERY update ends with a launch block** (Gareth, 2026-09-26;
+      widened 2026-09-27 to every update, not just ones with something
+      new): the very end of the message is a `bash` code block that cds
+      into this folder and runs `tools/playtest.sh` with the mode that
+      shows the newest thing (`street` when nothing changed), so the Run
+      button starts the game. After the five headings, nothing after:
       ```bash
       cd "/Users/gareth/Projects/Project Charlie" && tools/playtest.sh fight
       ```
