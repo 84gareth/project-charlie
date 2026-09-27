@@ -43,7 +43,7 @@ Shapes for art throughout; real art comes after Charlie says it's fun.
 - ✅ Gate for everything after it: Charlie plays it and says whether it's
   fun. Played v0.6.0 on 2026-09-27: "It's great."
 
-## Phase 3: Helpers (Charlie's design; Gareth asked for them 2026-09-27)
+## Phase 3: Helpers (Charlie's design; Gareth asked for them 2026-09-27) ✅
 1. ✅ Helper art: Charlie's drawings → Gemini → Meshy 3D → sprites
 2. ✅ Gems worth 10; helpers join at 200, 500 and 700 gems (you keep your
    gems) and follow you; all of them come (v0.7.0)
@@ -52,7 +52,8 @@ Shapes for art throughout; real art comes after Charlie says it's fun.
    it in one go (v0.8.0)
 4. ✅ Helpers give you a heart now and then when you've lost some: each
    one every 15 s at most (v0.8.0)
-- Gate: Charlie plays with his helpers and says whether they're fun
+- ✅ Gate: Charlie plays with his helpers and says whether they're fun.
+  Played v0.8.0 (helpers mode) on 2026-09-27: "Super fun!"
 
 ## After the touch test (to plan with Charlie and Gareth)
 - Dragons (boss or baddie: Charlie decides), a name, real art

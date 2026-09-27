@@ -269,6 +269,8 @@ Updated 2026-09-27 (v0.8.0).
   (2 damage). Each gives a heart at most every 15 s. Numbers live in
   `scripts/helpers.gd` and `scripts/helper_powers.gd`. Playtest with
   `tools/playtest.sh helpers`.
-- **Next: the Phase 3 gate.** Charlie plays with his helpers. Photos of
-  drawings go in `drawings/` (raw, not imported by Godot); finished art
-  goes in `assets/`.
+- **Phase 3 gate passed** (v0.8.0, 2026-09-27): "Super fun!"
+- **Next: pick the next phase with Charlie and Gareth** from "After the
+  touch test" in the roadmap. Open question for Gareth: add saving (gems
+  and helpers reset when the game closes)? Photos of drawings go in
+  `drawings/` (raw, not imported by Godot); finished art in `assets/`.
