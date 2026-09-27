@@ -31,6 +31,8 @@ collect the gems they leave behind.
   gem). Boss gems can come with the islands.
 - **How many hearts?** "12".
 - **The girl hero's hair:** two pigtails.
+- **Whole touch test (v0.6.0):** "It's great." Charlie wants to draw
+  things to go in the game.
 - **First play (v0.4.0, fight mode):** "super fun".
 
 ## Keep it right for a 5-year-old

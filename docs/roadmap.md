@@ -21,7 +21,7 @@ agreed before they're added (CLAUDE.md rule 11).
   Rewind), keyboard plus Xbox and Switch controllers, out of hearts means
   restart the fight and keep your gems
 
-## Phase 2: The first touch test
+## Phase 2: The first touch test ✅
 Shapes for art throughout; real art comes after Charlie says it's fun.
 1. ✅ A city street; the hero walks left, right, up and down, on keyboard
    or an Xbox or Switch controller (v0.2.0)
@@ -40,7 +40,8 @@ Shapes for art throughout; real art comes after Charlie says it's fun.
 5. ✅ Pick a boy or a girl at the start (v0.6.0). Two big cards, no
    reading; arrows/d-pad/stick to choose, any attack button, Enter or a
    click to pick. The girl has Charlie's two pigtails.
-- Gate for everything after it: Charlie plays it and says whether it's fun
+- ✅ Gate for everything after it: Charlie plays it and says whether it's
+  fun. Played v0.6.0 on 2026-09-27: "It's great."
 
 ## After the touch test (to plan with Charlie and Gareth)
 - Dragons (boss or baddie: Charlie decides), a name, real art

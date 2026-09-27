@@ -253,6 +253,7 @@ Updated 2026-09-27 (v0.6.0).
   or girl with two pigtails, Charlie's choice). Tests skip it by setting
   `hero_look` before adding the main scene; `tools/playtest.sh` takes
   `boy` or `girl` to skip it too.
-- **Next: the Phase 2 gate.** Charlie plays the whole thing from the pick
-  screen and says whether it's fun. Then plan what's after the touch test
-  with Charlie and Gareth.
+- **Phase 2 gate passed** (v0.6.0, 2026-09-27): "It's great."
+- **Next: Charlie's own drawings as the game's art.** Photos go in
+  `drawings/` (raw, not imported by Godot); cleaned-up versions go in
+  `assets/`. Then plan the rest of "after the touch test" with them.
