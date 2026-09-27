@@ -43,6 +43,15 @@ Shapes for art throughout; real art comes after Charlie says it's fun.
 - ✅ Gate for everything after it: Charlie plays it and says whether it's
   fun. Played v0.6.0 on 2026-09-27: "It's great."
 
+## Phase 3: Helpers (Charlie's design; Gareth asked for them 2026-09-27)
+1. Helper art: Charlie's drawings → Gemini → Meshy 3D → sprites
+2. Gems worth 10; helpers join at 200, 500 and 700 gems (you keep your
+   gems) and follow you; all of them come
+3. Powers: blue sends a wave along the street, yellow sneaks behind a
+   baddie and bonks it, green flies up and swoops down on one
+4. Helpers give you hearts now and then when you've lost some
+- Gate: Charlie plays with his helpers and says whether they're fun
+
 ## After the touch test (to plan with Charlie and Gareth)
 - Dragons (boss or baddie: Charlie decides), a name, real art
 - The talking sword: an in-game microphone; you tell the sword what to do

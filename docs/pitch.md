@@ -47,9 +47,15 @@ collect the gems they leave behind.
     legs, and a tall zig-zag lightning shape on its head.
   - Level 3 (`drawings/helper3_green.png`): arms up high, legs wide, a
     beard, and a big scribbly shape all around it.
-  - To check later: is it "reach 200 gems" or "spend 200 gems"? And gems
-    come one per baddie today, so 200 is about 67 waves. Gems per baddie
-    may need to go up.
+  - **Reach, not spend:** at 200 gems the blue helper comes and "I keep
+    my gems".
+  - **Who comes:** "All of them!"
+  - **Powers:** "blue - has waves, yellow has sneaky powers and green has
+    flying powers".
+  - **Gem value (Gareth):** each gem is worth 10, keeping Charlie's
+    200/500/700 (blue after about 7 waves).
+  - Art: Charlie's drawings → Gemini (`drawings/helper*_gemini.jpg`) →
+    Meshy 3D (`drawings/models/*.glb`) → rendered sprites in `assets/`.
 - **First play (v0.4.0, fight mode):** "super fun".
 
 ## Keep it right for a 5-year-old
