@@ -33,6 +33,9 @@ collect the gems they leave behind.
 - **The girl hero's hair:** two pigtails.
 - **Whole touch test (v0.6.0):** "It's great." Charlie wants to draw
   things to go in the game.
+- **Helpers (2026-09-27):** creatures "that help you in battle (like
+  Pokemon type creatures)". Charlie wants to draw them himself. What do
+  they do? They **attack** and **give you hearts**.
 - **First play (v0.4.0, fight mode):** "super fun".
 
 ## Keep it right for a 5-year-old
