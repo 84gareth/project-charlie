@@ -259,9 +259,11 @@ Updated 2026-10-25 (v0.9.0).
   verdicts: "It's great", "Super fun!".
 - **Phase 4: the web rebuild, in progress.** Step 1 done (v0.9.0): the
   street and walking, with the on-screen joystick, keyboard and controller,
-  tests in headless Chrome, and GitHub Pages.
-- **Next: Phase 4, step 2**, the sword and hammer. Then baddies and gems,
-  hearts, the pick screen, and the helpers, in that order.
+  tests in headless Chrome, and GitHub Pages (live and checked). Step 2
+  done (v0.10.0): sword and hammer buttons (`js/attacks.js`).
+- **Next: Phase 4, step 3**, baddies and gems (port `baddie_brain.gd`,
+  `waves.gd`, `gems.gd`, `fight_state.gd`'s gems). Then hearts, the pick
+  screen, and the helpers, in that order.
 - Open question for Gareth: saving (gems and helpers reset when the game
   closes). Charlie's next idea after the rebuild: dragons, islands, the
   talking sword, or more drawings.

@@ -63,7 +63,7 @@ carries over unchanged.
 1. ✅ Web setup: page, tests in headless Chrome, launcher, version stamps,
    GitHub Pages; the street and walking with an on-screen joystick (plus
    keyboard and controller) (v0.9.0)
-2. Sword and hammer: two big buttons
+2. ✅ Sword and hammer: two big buttons (v0.10.0)
 3. Baddies walk in, sink into the ground, drop gems worth 10; the gem
    counter
 4. Hearts: baddies punch back; out of hearts restarts the fight, gems kept
