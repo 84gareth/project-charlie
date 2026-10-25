@@ -277,6 +277,8 @@ Updated 2026-10-25 (v0.9.0).
   `js/layout.js`, `TREE_DROP` in `js/baddies.js`, the tree cut from his
   hide and seek drawing with `cutout.gd crop=`). Still to come: the house
   bug's grab (needs Charlie's button drawing).
+- **Home Screen icon (v0.14.1):** Charlie chose his blue helper; his drawing
+  cut out and put on yellow by `tools/image-fix/icon.gd`.
 - **Next:** the house bug's grab once the button is drawn; otherwise the
   pick screen and the helpers (roadmap order). Open for Gareth: helpers as
   Charlie's plain drawings instead of the 3D renders?

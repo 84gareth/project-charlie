@@ -46,3 +46,14 @@ test("the street is drawn (the canvas isn't blank)", async () => {
   assert.lt(road[0], 120, `road is dark: ${road}`);
   assert.gt(sky[2], 200, `sky is blue: ${sky}`);
 });
+
+test("a Home Screen icon for the iPad: Charlie's blue helper", async () => {
+  const page = await openPage("../index.html?manual=1");
+  await ready(page);
+  const link = page.document.querySelector('link[rel="apple-touch-icon"]');
+  assert.ok(link, "the icon is linked");
+  const img = new Image();
+  img.src = link.href;
+  await img.decode();
+  assert.eq([img.naturalWidth, img.naturalHeight], [180, 180]);
+});
