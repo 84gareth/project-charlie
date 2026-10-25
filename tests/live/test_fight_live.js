@@ -113,3 +113,15 @@ test("the bugs are Charlie's own drawings, and all three load", async () => {
     assert.ok(img.src.includes(`assets/baddies/${kind}.png`), kind);
   }
 });
+
+test("in the page, the teleportation bug pops up behind the hero", async () => {
+  const page = await start("&mode=practice");
+  const h = page.game.hero;
+  const b = page.game.spawnBaddie("teleport_bug", h.x + 300, h.y);
+  b.teleportWait = 0.5;
+  b.punchWait = 99;
+  run(page, 0.6);
+  assert.eq(b.state, "vanish", "puff");
+  run(page, 0.5);
+  assert.lt(b.x, h.x, "now behind the hero (who faces right)");
+});

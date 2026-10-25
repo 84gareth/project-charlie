@@ -270,8 +270,14 @@ Updated 2026-10-25 (v0.9.0).
   Charlie's drawings in as they are", no Gemini); the shapes only show while
   a picture loads. New drawings: `cutout.gd` with `erase=` for any tablecloth
   in the photo and `sat=` if the paper looks blue.
-- **Next: Phase 4, step 4**, hearts. Then the bugs' own moves, the pick
-  screen, and the helpers (roadmap order).
+- **Step 4 done (v0.12.0):** hearts, punches, falling down (`js/fight.js`).
+- **Step 5 in progress:** the teleportation bug's teleport is done
+  (v0.13.0; `TELEPORT` and `teleportSpot` in `js/baddies.js`). Still to
+  come: the house bug's grab (needs Charlie's button drawing) and the
+  Acorn dropping from trees (needs trees).
+- **Next:** whichever of those Charlie and Gareth pick, then the pick
+  screen and the helpers (roadmap order). Open for Gareth: helpers as
+  Charlie's plain drawings instead of the 3D renders?
 - **Waiting for Gareth's OK on placement:** Charlie's ball-and-goal mini
   game and his hide and seek (tree, bush, trampoline; the teleportation
   bug seeks). Both in `docs/pitch.md`.

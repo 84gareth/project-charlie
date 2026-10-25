@@ -178,6 +178,7 @@ function draw() {
       x: b.x, y: b.y, kind: b.kind, facing: b.facing, hurt: b.state === "hurt",
       pose: b.state === "windup" || b.state === "punch" ? b.state : "",
       sink: b.sinkAmount(), hover: HOVER[b.kind],
+      pop: b.popScale(), drop: b.drop, sparkle: b.teleporting(),
     }, game.time) })),
     { y: game.hero.y, draw: () => drawHero(ctx, game.hero, game.time) },
   ].sort((a, b) => a.y - b.y);

@@ -14,6 +14,34 @@ export const KINDS = ["house_bug", "acorn", "teleport_bug"];
 // and the Acorn bad guy fly (Charlie); the teleportation bug stands.
 export const HOVER = { house_bug: 110, acorn: 55, teleport_bug: 0 };
 
+// ─── The teleportation bug's teleport ──────────────────────────────────────
+// Charlie: "it can teleport anywhere to scare you, behind, above and in
+// front of you!" Every few seconds, when it's near you, it vanishes in a
+// puff of sparkles and pops up next to you, taking turns: behind you,
+// above you (then dropping down in front), in front of you. Straight after
+// popping up it gets ready to punch: that's the scare.
+export const TELEPORT = {
+  FIRST: 2.0,      // seconds before its first teleport
+  EVERY: 4.0,      // seconds between teleports
+  RANGE: 700,      // only when this close to the hero (about on screen)
+  VANISH: 0.35,    // seconds to vanish (can't be hit meanwhile)
+  APPEAR: 0.4,     // seconds to pop up (and drop, from above)
+  DROP: 260,       // how high above you it appears before dropping
+  SCARE: 0.4,      // seconds after popping up before it winds up a punch
+  ORDER: ["behind", "above", "front"],
+};
+
+// Where the teleportation bug pops up: beside the hero, behind or in
+// front of where they're facing (from above, it drops in front), kept on
+// the street.
+export function teleportSpot(where, hero, facing, area) {
+  const side = where === "behind" ? -facing : facing;
+  return {
+    x: clamp(hero.x + side * Brain.STOP_X, area.x, area.x + area.w),
+    y: clamp(hero.y, area.y, area.y + area.h),
+  };
+}
+
 export class Baddie {
   constructor(kind, x, y, lane = 0) {
     this.kind = kind;
@@ -27,6 +55,12 @@ export class Baddie {
     this.facing = -1;
     // Seconds until it may start its next punch.
     this.punchWait = Brain.FIRST_PUNCH;
+    // The teleportation bug: seconds to its next teleport, which way it
+    // goes next, where it's going, and how high it still is when dropping.
+    this.teleportWait = TELEPORT.FIRST;
+    this.teleports = 0;
+    this.goingTo = null;
+    this.drop = 0;
     // Every attack that has hit it: one swing or spin hits once.
     this.hitBy = new Set();
   }
@@ -41,7 +75,7 @@ export class Baddie {
   // Hit by attack number `attackId` from someone standing at `fromX`.
   // True if it counted. A hit stops a wind-up.
   takeHit(damage, attackId, fromX, area) {
-    if (!this.alive() || this.hitBy.has(attackId)) return false;
+    if (!this.alive() || this.state === "vanish" || this.hitBy.has(attackId)) return false;
     this.hitBy.add(attackId);
     this.hp -= damage;
     this.x = clamp(this.x + Math.sign(this.x - fromX) * Brain.KNOCKBACK, area.x, area.x + area.w);
@@ -58,11 +92,38 @@ export class Baddie {
     switch (this.state) {
       case "walk":
         this.punchWait -= dt;
+        if (this.kind === "teleport_bug") this.teleportWait -= dt;
         if (hero) {
           const p = Brain.step(this, Brain.chaseTarget(hero, this, this.lane, area), dt);
           this.x = p.x;
           this.y = p.y;
-          if (this.punchWait <= 0 && Brain.inReach(this, hero)) this.enter("windup");
+          if (this.kind === "teleport_bug" && this.teleportWait <= 0
+              && Math.abs(hero.x - this.x) <= TELEPORT.RANGE) {
+            const where = TELEPORT.ORDER[this.teleports % TELEPORT.ORDER.length];
+            this.teleports += 1;
+            this.goingTo = { where, ...teleportSpot(where, hero, hero.facing || 1, area) };
+            this.enter("vanish");
+          } else if (this.punchWait <= 0 && Brain.inReach(this, hero)) {
+            this.enter("windup");
+          }
+        }
+        break;
+      case "vanish":
+        if (this.timer >= TELEPORT.VANISH) {
+          this.x = this.goingTo.x;
+          this.y = this.goingTo.y;
+          this.drop = this.goingTo.where === "above" ? TELEPORT.DROP : 0;
+          this.enter("appear");
+        }
+        break;
+      case "appear":
+        this.drop = this.goingTo.where === "above"
+          ? TELEPORT.DROP * Math.max(0, 1 - this.timer / TELEPORT.APPEAR) : 0;
+        if (this.timer >= TELEPORT.APPEAR) {
+          this.drop = 0;
+          this.teleportWait = TELEPORT.EVERY;
+          this.punchWait = Math.min(this.punchWait, TELEPORT.SCARE);
+          this.enter("walk");
         }
         break;
       case "windup":
@@ -94,4 +155,17 @@ export class Baddie {
 
   // 0 standing, 1 all the way into the ground.
   sinkAmount() { return this.state === "sink" ? Math.min(1, this.timer / Brain.SINK_TIME) : 0; }
+
+  // How big it's drawn while teleporting: shrinking away to nothing, then
+  // popping back up (a little too big for a moment). 1 the rest of the time.
+  popScale() {
+    if (this.state === "vanish") return Math.max(0, 1 - this.timer / TELEPORT.VANISH);
+    if (this.state === "appear") {
+      const k = Math.min(1, this.timer / (TELEPORT.APPEAR * 0.5));
+      return k < 1 ? k * 1.15 : 1 + 0.15 * Math.max(0, 1 - (this.timer - TELEPORT.APPEAR * 0.5) / (TELEPORT.APPEAR * 0.5));
+    }
+    return 1;
+  }
+
+  teleporting() { return this.state === "vanish" || this.state === "appear"; }
 }

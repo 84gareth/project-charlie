@@ -293,8 +293,10 @@ export function drawBaddie(ctx, b, now = 0) {
   // coming. Punching: a lunge toward the hero.
   if (b.pose === "windup") wobble = Math.sin(now * 45) * 3 - 8 * (b.facing || 1);
   if (b.pose === "punch") wobble = 26 * (b.facing || 1);
-  ctx.translate(wobble, -lift + sink * 220);
-  ctx.scale(b.facing || 1, 1);
+  ctx.translate(wobble, -lift - (b.drop || 0) + sink * 220);
+  if (b.sparkle) drawSparkles(ctx, now);
+  const pop = b.pop ?? 1;
+  ctx.scale((b.facing || 1) * pop, pop);
   if (b.hurt) ctx.globalAlpha = 0.55;
   const pic = BUG_PICTURES[b.kind];
   if (pic && pic.complete && pic.naturalWidth > 0) {
@@ -307,6 +309,17 @@ export function drawBaddie(ctx, b, now = 0) {
   else if (b.kind === "acorn") drawAcorn(ctx, now);
   else drawTeleportBug(ctx, now);
   ctx.restore();
+}
+
+// The teleportation bug's puff: purple and white sparkles whirling round
+// where it's vanishing or popping up.
+function drawSparkles(ctx, now) {
+  for (let i = 0; i < 10; i++) {
+    const a = now * 6 + (i * Math.PI * 2) / 10;
+    const r = 55 + 25 * Math.sin(now * 9 + i);
+    circle(ctx, Math.cos(a) * r, -100 + Math.sin(a) * r * 1.3, i % 2 ? 7 : 10,
+      i % 2 ? "rgba(255, 255, 255, 0.9)" : "rgba(160, 110, 255, 0.9)");
+  }
 }
 
 // Charlie's drawings of his bugs, cut out of the paper by
