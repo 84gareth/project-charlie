@@ -65,9 +65,9 @@ carries over unchanged.
    keyboard and controller) (v0.9.0)
 2. ✅ Sword and hammer: two big buttons (v0.10.0)
 3. ✅ Charlie's three bugs (house bug, Acorn bad guy, teleportation bug,
-   one of each per wave; simple shapes from his drawings until their
-   Gemini and Meshy pictures are made) walk or fly in, sink into the
-   ground, drop gems worth 10; the gem counter (v0.11.0)
+   one of each per wave, as Charlie drew them: his drawings cut out of the
+   paper, v0.11.1) walk or fly in, sink into the ground, drop gems worth
+   10; the gem counter (v0.11.0)
 4. Hearts: bugs punch back; out of hearts restarts the fight, gems kept
 5. The bugs' own moves, one at a time (Gareth, 2026-10-25): the house bug
    grabs you with its tentacles and you tap a button three times to get
