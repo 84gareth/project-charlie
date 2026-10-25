@@ -69,3 +69,28 @@ export function drawGemCounter(ctx, count) {
   ctx.fillStyle = "#ffffff";
   ctx.fillText(String(count), 92, 60);
 }
+
+// The hearts, under the gem counter: two rows of six, full ones red, lost
+// ones grey (Charlie chose 12).
+const HEART_FULL = "rgb(242, 51, 77)";
+const HEART_EMPTY = "rgb(209, 209, 219)";
+const HEART_EDGE = "rgb(38, 26, 64)";
+export function drawHearts(ctx, hearts, max) {
+  for (let i = 0; i < max; i++) {
+    const x = 46 + (i % 6) * 46, y = 132 + Math.floor(i / 6) * 46;
+    heart(ctx, x, y, 1.08, HEART_EDGE);
+    heart(ctx, x, y, 1, i < hearts ? HEART_FULL : HEART_EMPTY);
+  }
+}
+
+export function heart(ctx, x, y, s, colour) {
+  circle(ctx, x - 9 * s, y - 6 * s, 11 * s, colour);
+  circle(ctx, x + 9 * s, y - 6 * s, 11 * s, colour);
+  ctx.fillStyle = colour;
+  ctx.beginPath();
+  ctx.moveTo(x - 19.5 * s, y - 2 * s);
+  ctx.lineTo(x + 19.5 * s, y - 2 * s);
+  ctx.lineTo(x, y + 20 * s);
+  ctx.closePath();
+  ctx.fill();
+}

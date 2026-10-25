@@ -1,7 +1,7 @@
 // How a baddie moves, as pure numbers and maths (carried over unchanged
 // from the Godot game's baddie_brain.gd): walk (or fly) up beside the
-// hero and wait there; two hits and it sinks into the ground.
-// Punching back comes with the hearts (Phase 4, step 4).
+// hero, now and then wind up a punch (step away in time and it misses);
+// two hits and it sinks into the ground.
 import { clamp } from "./layout.js";
 
 // World units per second; slower than the hero so Charlie can get away.
@@ -33,3 +33,20 @@ const toward = (from, to, most) => (Math.abs(to - from) <= most ? to : from + Ma
 export function step(me, target, dt) {
   return { x: toward(me.x, target.x, SPEED.x * dt), y: toward(me.y, target.y, SPEED.y * dt) };
 }
+
+// ─── Punching back ─────────────────────────────────────────────────────────
+// A punch lands if the hero is this close, along and across the street.
+export const PUNCH_REACH = { x: 140, y: 45 };
+// Seconds of wind-up before a punch: long enough to see it and step away.
+export const WINDUP = 0.7;
+// Seconds the punch pose shows after it's thrown.
+export const PUNCH_SHOW = 0.2;
+// Seconds between one baddie's punches.
+export const COOLDOWN = 2.5;
+// Before its first punch: this long, plus STAGGER per place in the wave,
+// so a whole wave doesn't punch together.
+export const FIRST_PUNCH = 1.0;
+export const STAGGER = 0.8;
+
+export const inReach = (me, hero) =>
+  Math.abs(hero.x - me.x) <= PUNCH_REACH.x && Math.abs(hero.y - me.y) <= PUNCH_REACH.y;

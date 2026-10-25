@@ -1,7 +1,9 @@
 // The game page: one city street, the hero swinging the sword and
-// spinning the hammer, and waves of Charlie's three bugs that sink into
-// the ground and leave a gem each. Beat a wave and another comes. Runs the
-// loop, draws, and hands touches and keys to the rules.
+// spinning the hammer, and waves of Charlie's three bugs that punch back
+// and sink into the ground leaving a gem each. Beat a wave and another
+// comes. Out of hearts: the hero falls down, the fight starts again with
+// full hearts, and the gems are kept. Runs the loop, draws, and hands
+// touches and keys to the rules.
 //
 // For tests: window.game is the game's state and window.gameTick(dt) steps
 // it by hand; with ?manual=1 in the address the game doesn't run by itself.
@@ -9,12 +11,13 @@ import { GAME_NAME, VERSION } from "./version.js";
 import { WALK_AREA, HERO_START, view, cameraX } from "./layout.js";
 import * as Walk from "./walk.js";
 import { AttackState, hits } from "./attacks.js";
-import { DAMAGE } from "./baddie_brain.js";
+import { DAMAGE, FIRST_PUNCH, STAGGER } from "./baddie_brain.js";
 import { Baddie, HOVER } from "./baddies.js";
 import * as Waves from "./waves.js";
-import { GEM_VALUE, touching } from "./gems.js";
+import { touching } from "./gems.js";
+import { FightState, MAX_HEARTS, DOWN_TIME, bumpedX } from "./fight.js";
 import { drawStreet, drawHero, drawBaddie, drawGem, loadBugPictures } from "./art.js";
-import { drawControls, drawGemCounter } from "./hud.js";
+import { drawControls, drawGemCounter, drawHearts } from "./hud.js";
 import { createInput } from "./input.js";
 import { options } from "./playtest.js";
 
@@ -30,12 +33,17 @@ const game = {
   camX: 0,
   hero: {
     x: HERO_START.x, y: HERO_START.y, facing: 1, look: opts.hero || "boy",
-    moving: false, stepTime: 0, attack: "", progress: 0,
+    moving: false, stepTime: 0, attack: "", progress: 0, down: false, alpha: 1,
   },
   attack: new AttackState(),
   // Counts up with every attack, so a baddie is hit once per swing or spin.
   attackId: 0,
-  gems: 0,
+  // Hearts and gems.
+  fight: new FightState(),
+  get gems() { return game.fight.gems; },
+  set gems(v) { game.fight.gems = v; },
+  // Seconds left lying down after running out of hearts.
+  downLeft: 0,
   // Bugs on the street (including ones sinking), and gems lying there.
   baddies: [],
   looseGems: [],
@@ -50,20 +58,36 @@ const game = {
   },
   startWave(startDist = Waves.OFFSCREEN) {
     game.waveWait = 0;
-    Waves.spawnPoints(game.hero.x, WALK_AREA, Waves.SIZE, startDist)
-      .forEach((p, i) => game.spawnBaddie(Waves.kind(i), p.x, p.y, Waves.lane(i)));
+    Waves.spawnPoints(game.hero.x, WALK_AREA, Waves.SIZE, startDist).forEach((p, i) => {
+      const b = game.spawnBaddie(Waves.kind(i), p.x, p.y, Waves.lane(i));
+      b.punchWait = FIRST_PUNCH + i * STAGGER;
+    });
   },
 };
 
 export function tick(dt) {
   game.time += dt;
   input.poll();
+  const h = game.hero;
+  game.fight.update(dt);
+  // Blinking for a moment after a punch.
+  h.alpha = game.fight.isSafe() && !h.down && Math.floor(game.time * 10) % 2 === 0 ? 0.35 : 1;
+  if (h.down) {
+    input.takePresses();   // no attacking while lying down
+    game.downLeft -= dt;
+    if (game.downLeft <= 0) {
+      h.down = false;
+      game.fight.restartFight();
+    }
+    followWithCamera(dt);
+    return;
+  }
+
   // A press while an attack is going is ignored (no queueing up).
   for (const kind of input.takePresses()) {
     if (game.attack.start(kind)) game.attackId += 1;
   }
   game.attack.update(dt);
-  const h = game.hero;
   h.attack = game.attack.kind;
   h.progress = game.attack.progress();
   // Standing still while attacking.
@@ -77,18 +101,24 @@ export function tick(dt) {
 
   hitBaddies();
   for (const b of game.baddies) {
-    if (b.update(dt, h, WALK_AREA) === "sunk") game.looseGems.push({ x: b.x, y: b.y });
+    const event = b.update(dt, h, WALK_AREA);
+    if (event === "sunk") game.looseGems.push({ x: b.x, y: b.y });
+    if (event === "punch") punched(b);
+    if (h.down) break;
   }
   game.baddies = game.baddies.filter((b) => b.state !== "gone");
   pickUpGems();
-  if (game.wavesOn && game.baddies.length === 0) {
+  if (game.wavesOn && game.baddies.length === 0 && !h.down) {
     game.waveWait += dt;
     if (game.waveWait >= Waves.PAUSE) game.startWave();
   }
+  followWithCamera(dt);
+}
 
-  // The camera glides after the hero.
+// The camera glides after the hero.
+function followWithCamera(dt) {
   const v = view(canvas.clientWidth, canvas.clientHeight);
-  const target = cameraX(h.x, v.width);
+  const target = cameraX(game.hero.x, v.width);
   game.camX += (target - game.camX) * Math.min(1, dt * 6);
 }
 
@@ -102,10 +132,30 @@ function hitBaddies() {
   }
 }
 
+// A bug's punch landed: a heart goes and the hero is bumped back.
+function punched(b) {
+  const h = game.hero;
+  if (h.down || !game.fight.takeHit()) return;
+  h.x = bumpedX(h.x, h.facing, b.x, WALK_AREA);
+  if (game.fight.outOfHearts()) fallDown();
+}
+
+// Out of hearts: the hero lies down and this fight's bugs go away. Then
+// up again with full hearts, every gem kept, and the fight starts over.
+function fallDown() {
+  const h = game.hero;
+  h.down = true;
+  h.attack = "";
+  game.attack = new AttackState();
+  game.downLeft = DOWN_TIME;
+  game.baddies = [];
+  game.waveWait = 0;
+}
+
 function pickUpGems() {
   const before = game.looseGems.length;
   game.looseGems = game.looseGems.filter((g) => !touching(game.hero, g));
-  game.gems += (before - game.looseGems.length) * GEM_VALUE;
+  for (let i = game.looseGems.length; i < before; i++) game.fight.addGem();
 }
 
 function draw() {
@@ -126,6 +176,7 @@ function draw() {
     ...game.looseGems.map((g) => ({ y: g.y, draw: () => drawGem(ctx, g, game.time) })),
     ...game.baddies.map((b) => ({ y: b.y, draw: () => drawBaddie(ctx, {
       x: b.x, y: b.y, kind: b.kind, facing: b.facing, hurt: b.state === "hurt",
+      pose: b.state === "windup" || b.state === "punch" ? b.state : "",
       sink: b.sinkAmount(), hover: HOVER[b.kind],
     }, game.time) })),
     { y: game.hero.y, draw: () => drawHero(ctx, game.hero, game.time) },
@@ -133,6 +184,7 @@ function draw() {
   for (const t of things) t.draw();
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   drawGemCounter(ctx, game.gems);
+  drawHearts(ctx, game.fight.hearts, MAX_HEARTS);
   if (input.showTouch()) drawControls(ctx, w, h, input.stick, input.buttonsDown());
 }
 

@@ -68,7 +68,8 @@ carries over unchanged.
    one of each per wave, as Charlie drew them: his drawings cut out of the
    paper, v0.11.1) walk or fly in, sink into the ground, drop gems worth
    10; the gem counter (v0.11.0)
-4. Hearts: bugs punch back; out of hearts restarts the fight, gems kept
+4. ✅ Hearts: bugs punch back; out of hearts restarts the fight, gems kept
+   (v0.12.0)
 5. The bugs' own moves, one at a time (Gareth, 2026-10-25): the house bug
    grabs you with its tentacles and you tap a button three times to get
    free (Charlie is drawing the button); the Acorn bad guy drops from

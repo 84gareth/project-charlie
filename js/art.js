@@ -288,7 +288,11 @@ export function drawBaddie(ctx, b, now = 0) {
   ctx.beginPath();
   ctx.rect(-400, -600, 800, 600);
   ctx.clip();
-  const wobble = b.hurt ? Math.sin(now * 60) * 6 : 0;
+  let wobble = b.hurt ? Math.sin(now * 60) * 6 : 0;
+  // Winding up a punch: trembling and leaning back, so Charlie can see it
+  // coming. Punching: a lunge toward the hero.
+  if (b.pose === "windup") wobble = Math.sin(now * 45) * 3 - 8 * (b.facing || 1);
+  if (b.pose === "punch") wobble = 26 * (b.facing || 1);
   ctx.translate(wobble, -lift + sink * 220);
   ctx.scale(b.facing || 1, 1);
   if (b.hurt) ctx.globalAlpha = 0.55;
@@ -297,8 +301,8 @@ export function drawBaddie(ctx, b, now = 0) {
     // Charlie's own drawing, just as he drew it, swaying a little.
     const h = BUG_HEIGHT[b.kind];
     const w = (h * pic.naturalWidth) / pic.naturalHeight;
-    ctx.rotate(Math.sin(now * 3 + b.x * 0.02) * 0.05);
-    ctx.drawImage(pic, -w / 2, -h, w, h);
+    ctx.rotate(Math.sin(now * 3 + b.x * 0.02) * 0.05 + (b.pose === "windup" ? -0.12 : 0));
+    ctx.drawImage(b.pose === "windup" ? reddish(b.kind, pic) : pic, -w / 2, -h, w, h);
   } else if (b.kind === "house_bug") drawHouseBug(ctx, now);
   else if (b.kind === "acorn") drawAcorn(ctx, now);
   else drawTeleportBug(ctx, now);
@@ -311,6 +315,23 @@ export function drawBaddie(ctx, b, now = 0) {
 // stand in.
 export const BUG_HEIGHT = { house_bug: 170, acorn: 160, teleport_bug: 210 };
 const BUG_PICTURES = {};
+const REDDISH = {};
+
+// A reddish copy of a bug's picture, for winding up a punch; made once.
+function reddish(kind, pic) {
+  if (!REDDISH[kind]) {
+    const c = document.createElement("canvas");
+    c.width = pic.naturalWidth;
+    c.height = pic.naturalHeight;
+    const g = c.getContext("2d");
+    g.drawImage(pic, 0, 0);
+    g.globalCompositeOperation = "source-atop";
+    g.fillStyle = "rgba(255, 90, 60, 0.4)";
+    g.fillRect(0, 0, c.width, c.height);
+    REDDISH[kind] = c;
+  }
+  return REDDISH[kind];
+}
 
 export function loadBugPictures(version) {
   for (const kind of Object.keys(BUG_HEIGHT)) {

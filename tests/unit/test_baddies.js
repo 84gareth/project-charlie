@@ -56,3 +56,43 @@ test("knockback never pushes it off the street", () => {
   b.takeHit(1, 1, AREA.x + AREA.w - 100, AREA);
   assert.eq(b.x, AREA.x + AREA.w);
 });
+
+// ─── Punching back (Godot's baddie_brain and hearts checks) ───────────────
+
+test("once beside the hero it winds up, then punches", () => {
+  const b = new Baddie("acorn", HERO.x + Brain.STOP_X, HERO.y);
+  b.punchWait = 0;
+  b.update(1 / 60, HERO, AREA);
+  assert.eq(b.state, "windup");
+  let event = null;
+  for (let t = 0; t < Brain.WINDUP + 0.05 && !event; t += 1 / 60) event = b.update(1 / 60, HERO, AREA);
+  assert.eq(event, "punch", "the punch lands");
+  assert.eq(b.state, "punch");
+  assert.near(b.punchWait, Brain.COOLDOWN, 1e-9, "then rests");
+});
+
+test("stepping away during the wind-up makes it miss", () => {
+  const b = new Baddie("acorn", HERO.x + Brain.STOP_X, HERO.y);
+  b.punchWait = 0;
+  b.update(1 / 60, HERO, AREA);
+  const away = { x: HERO.x - 300, y: HERO.y };
+  let event = null;
+  for (let t = 0; t < Brain.WINDUP + 0.05; t += 1 / 60) event = b.update(1 / 60, away, AREA) || event;
+  assert.eq(event, null, "missed");
+});
+
+test("hitting it during the wind-up stops the punch", () => {
+  const b = new Baddie("house_bug", HERO.x + Brain.STOP_X, HERO.y);
+  b.punchWait = 0;
+  b.update(1 / 60, HERO, AREA);
+  b.takeHit(1, 1, HERO.x, AREA);
+  let event = null;
+  for (let t = 0; t < 1.5; t += 1 / 60) event = b.update(1 / 60, HERO, AREA) || event;
+  assert.eq(event, null, "no punch");
+});
+
+test("the wind-up gives time to dodge", () => {
+  // Walking away for the whole wind-up gets well out of reach.
+  assert.gt(420 * Brain.WINDUP, (Brain.PUNCH_REACH.x - Brain.STOP_X) * 3);
+  assert.gt(Brain.COOLDOWN, Brain.WINDUP, "rests between punches");
+});
