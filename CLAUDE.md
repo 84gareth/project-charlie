@@ -265,7 +265,11 @@ Updated 2026-10-25 (v0.9.0).
   monsters (Gareth's call), one of each per wave, drawn as simple shapes
   from his drawings in `js/art.js` until their real pictures exist
   (prompts in `docs/art_prompts.md`); `js/baddies.js` is the pure bug state
-  machine. Gems worth 10 and the counter.
+  machine. Gems worth 10 and the counter. v0.11.1: the bugs are Charlie's own
+  drawings, cut out of the paper by `tools/image-fix/cutout.gd` (Gareth: "put
+  Charlie's drawings in as they are", no Gemini); the shapes only show while
+  a picture loads. New drawings: `cutout.gd` with `erase=` for any tablecloth
+  in the photo and `sat=` if the paper looks blue.
 - **Next: Phase 4, step 4**, hearts. Then the bugs' own moves, the pick
   screen, and the helpers (roadmap order).
 - **Waiting for Gareth's OK on placement:** Charlie's ball-and-goal mini

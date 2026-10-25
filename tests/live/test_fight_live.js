@@ -102,3 +102,14 @@ test("the gem counter is drawn in the corner", async () => {
   const [r, g, b] = c.getContext("2d").getImageData(52 * dpr, 60 * dpr, 1, 1).data;
   assert.ok(r > 200 && g < 150 && b > 120, `a pink gem: ${r},${g},${b}`);
 });
+
+test("the bugs are Charlie's own drawings, and all three load", async () => {
+  const page = await start();
+  const pics = page.bugPictures;
+  assert.eq(Object.keys(pics).sort(), ["acorn", "house_bug", "teleport_bug"]);
+  for (const [kind, img] of Object.entries(pics)) {
+    await until(() => img.complete, `${kind} finished loading`);
+    assert.gt(img.naturalWidth, 100, `${kind} is a real picture`);
+    assert.ok(img.src.includes(`assets/baddies/${kind}.png`), kind);
+  }
+});

@@ -13,7 +13,7 @@ import { DAMAGE } from "./baddie_brain.js";
 import { Baddie, HOVER } from "./baddies.js";
 import * as Waves from "./waves.js";
 import { GEM_VALUE, touching } from "./gems.js";
-import { drawStreet, drawHero, drawBaddie, drawGem } from "./art.js";
+import { drawStreet, drawHero, drawBaddie, drawGem, loadBugPictures } from "./art.js";
 import { drawControls, drawGemCounter } from "./hud.js";
 import { createInput } from "./input.js";
 import { options } from "./playtest.js";
@@ -22,6 +22,7 @@ const opts = options(location.search);
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const input = createInput(canvas);
+const bugPictures = loadBugPictures(VERSION);
 
 const game = {
   mode: opts.mode,
@@ -148,6 +149,7 @@ document.getElementById("version").textContent = "v" + VERSION;
 game.camX = cameraX(game.hero.x, view(canvas.clientWidth, canvas.clientHeight).width);
 if (opts.mode === "fight") game.startWave(Waves.CLOSE);
 window.game = game;
+window.bugPictures = bugPictures;
 window.gameTick = (dt) => { tick(dt); draw(); };
 if (opts.manual) draw();
 else requestAnimationFrame(frame);

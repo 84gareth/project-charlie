@@ -289,13 +289,36 @@ export function drawBaddie(ctx, b, now = 0) {
   ctx.rect(-400, -600, 800, 600);
   ctx.clip();
   const wobble = b.hurt ? Math.sin(now * 60) * 6 : 0;
-  ctx.translate(wobble, -lift + sink * 170);
+  ctx.translate(wobble, -lift + sink * 220);
   ctx.scale(b.facing || 1, 1);
   if (b.hurt) ctx.globalAlpha = 0.55;
-  if (b.kind === "house_bug") drawHouseBug(ctx, now);
+  const pic = BUG_PICTURES[b.kind];
+  if (pic && pic.complete && pic.naturalWidth > 0) {
+    // Charlie's own drawing, just as he drew it, swaying a little.
+    const h = BUG_HEIGHT[b.kind];
+    const w = (h * pic.naturalWidth) / pic.naturalHeight;
+    ctx.rotate(Math.sin(now * 3 + b.x * 0.02) * 0.05);
+    ctx.drawImage(pic, -w / 2, -h, w, h);
+  } else if (b.kind === "house_bug") drawHouseBug(ctx, now);
   else if (b.kind === "acorn") drawAcorn(ctx, now);
   else drawTeleportBug(ctx, now);
   ctx.restore();
+}
+
+// Charlie's drawings of his bugs, cut out of the paper by
+// tools/image-fix/cutout.gd (Gareth, 2026-10-25: "put Charlie's drawings
+// in as they are"). Until a picture has loaded, the simple shapes below
+// stand in.
+export const BUG_HEIGHT = { house_bug: 170, acorn: 160, teleport_bug: 210 };
+const BUG_PICTURES = {};
+
+export function loadBugPictures(version) {
+  for (const kind of Object.keys(BUG_HEIGHT)) {
+    const img = new Image();
+    img.src = `assets/baddies/${kind}.png?v=${version}`;
+    BUG_PICTURES[kind] = img;
+  }
+  return BUG_PICTURES;
 }
 
 // Black square body, two striped pale blue wings, five dangly tentacles.
