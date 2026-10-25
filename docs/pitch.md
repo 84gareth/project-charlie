@@ -58,6 +58,31 @@ collect the gems they leave behind.
     Meshy 3D (`drawings/models/*.glb`) → rendered sprites in `assets/`.
 - **First play (v0.4.0, fight mode):** "super fun".
 
+## Charlie's three baddies (drawn 2026-10-25)
+Charlie's own baddies, to replace the purple placeholder monsters.
+- **The house bug** (`drawings/baddie_house_bug.jpg`): a black body, two
+  blue striped wings, five dangly tentacles. "it can fly and it uses its
+  tentacles to capture your character."
+- **The Acorn bad guy** (`drawings/baddie_acorn.jpg`; Charlie drew it
+  upside down, the original is `baddie_acorn_as_drawn.jpg`): a brown acorn
+  with a dark cap, two wings and five legs. "They drop from trees and
+  attack you and can fly too."
+- **The teleportation bug** (`drawings/baddie_teleport_bug.jpg`): a long
+  purple body with a dark band at the top and two purple arms. "it can
+  teleport anywhere to scare you, behind, above and in front of you!"
+- **Getting away from the house bug:** "There will be a button you need to
+  tap three times to get free" (Charlie will draw the button).
+- **Gareth (2026-10-25):** the bugs come in Phase 4, step 3, in place of
+  the purple placeholder monsters: the same fight first, then their
+  special moves one at a time. Simple shapes stand in until their Gemini
+  and Meshy pictures are made.
+
+## Charlie's mini game: ball and goal (drawn 2026-10-25)
+"This is the goal and ball. You have to kick the ball into it as a mini
+game you can do whenever you want." Drawings: `drawings/minigame_ball.jpg`
+(a black ball) and `drawings/minigame_goal.jpg` (a net). Not yet on the
+roadmap: waiting for Gareth's OK on where it goes.
+
 ## Keep it right for a 5-year-old
 Cartoon fighting only: bonks and swooshes, no blood, nothing scary. Baddies
 sink into the ground rather than anything grim. The game must play without
