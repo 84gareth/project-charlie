@@ -2,4 +2,4 @@
 // version on every gameplay change (CLAUDE.md rule 6), then run
 // `python3 tools/stamp.py`.
 export const GAME_NAME = "Project Charlie";
-export const VERSION = "0.9.0";
+export const VERSION = "0.10.0";

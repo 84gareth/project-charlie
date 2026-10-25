@@ -1,11 +1,13 @@
-// The game page: one city street and the hero walking along it. Runs the
-// loop, draws, and hands touches and keys to the rules.
+// The game page: one city street and the hero walking along it, swinging
+// the sword and spinning the hammer. Runs the loop, draws, and hands
+// touches and keys to the rules.
 //
 // For tests: window.game is the game's state and window.gameTick(dt) steps
 // it by hand; with ?manual=1 in the address the game doesn't run by itself.
 import { GAME_NAME, VERSION } from "./version.js";
 import { WALK_AREA, HERO_START, view, cameraX } from "./layout.js";
 import * as Walk from "./walk.js";
+import { AttackState } from "./attacks.js";
 import { drawStreet, drawHero } from "./art.js";
 import { drawControls } from "./hud.js";
 import { createInput } from "./input.js";
@@ -22,16 +24,26 @@ const game = {
   camX: 0,
   hero: {
     x: HERO_START.x, y: HERO_START.y, facing: 1, look: opts.hero || "boy",
-    moving: false, stepTime: 0,
+    moving: false, stepTime: 0, attack: "", progress: 0,
   },
+  attack: new AttackState(),
+  // Counts up with every attack, so a baddie is hit once per swing or spin.
+  attackId: 0,
 };
 
 export function tick(dt) {
   game.time += dt;
   input.poll();
-  input.takePresses();   // attacks arrive with the sword and hammer
+  // A press while an attack is going is ignored (no queueing up).
+  for (const kind of input.takePresses()) {
+    if (game.attack.start(kind)) game.attackId += 1;
+  }
+  game.attack.update(dt);
   const h = game.hero;
-  const dir = input.direction();
+  h.attack = game.attack.kind;
+  h.progress = game.attack.progress();
+  // Standing still while attacking.
+  const dir = game.attack.busy() ? { x: 0, y: 0 } : input.direction();
   const next = Walk.step(h, dir, dt, WALK_AREA);
   h.x = next.x;
   h.y = next.y;
