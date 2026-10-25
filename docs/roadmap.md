@@ -64,11 +64,17 @@ carries over unchanged.
    GitHub Pages; the street and walking with an on-screen joystick (plus
    keyboard and controller) (v0.9.0)
 2. ✅ Sword and hammer: two big buttons (v0.10.0)
-3. Baddies walk in, sink into the ground, drop gems worth 10; the gem
-   counter
-4. Hearts: baddies punch back; out of hearts restarts the fight, gems kept
-5. Pick a boy or a girl at the start
-6. Charlie's three helpers, their powers and hearts
+3. ✅ Charlie's three bugs (house bug, Acorn bad guy, teleportation bug,
+   one of each per wave; simple shapes from his drawings until their
+   Gemini and Meshy pictures are made) walk or fly in, sink into the
+   ground, drop gems worth 10; the gem counter (v0.11.0)
+4. Hearts: bugs punch back; out of hearts restarts the fight, gems kept
+5. The bugs' own moves, one at a time (Gareth, 2026-10-25): the house bug
+   grabs you with its tentacles and you tap a button three times to get
+   free (Charlie is drawing the button); the Acorn bad guy drops from
+   trees; the teleportation bug pops up behind, above and in front of you
+6. Pick a boy or a girl at the start
+7. Charlie's three helpers, their powers and hearts
 - Gate: Charlie plays it on his iPad and says whether it's as fun
 
 ## After the touch test (to plan with Charlie and Gareth)

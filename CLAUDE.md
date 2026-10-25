@@ -261,9 +261,18 @@ Updated 2026-10-25 (v0.9.0).
   street and walking, with the on-screen joystick, keyboard and controller,
   tests in headless Chrome, and GitHub Pages (live and checked). Step 2
   done (v0.10.0): sword and hammer buttons (`js/attacks.js`).
-- **Next: Phase 4, step 3**, baddies and gems (port `baddie_brain.gd`,
-  `waves.gd`, `gems.gd`, `fight_state.gd`'s gems). Then hearts, the pick
-  screen, and the helpers, in that order.
+- **Step 3 done (v0.11.0):** Charlie's three bugs replace the purple
+  monsters (Gareth's call), one of each per wave, drawn as simple shapes
+  from his drawings in `js/art.js` until their real pictures exist
+  (prompts in `docs/art_prompts.md`); `js/baddies.js` is the pure bug state
+  machine. Gems worth 10 and the counter.
+- **Next: Phase 4, step 4**, hearts. Then the bugs' own moves, the pick
+  screen, and the helpers (roadmap order).
+- **Waiting for Gareth's OK on placement:** Charlie's ball-and-goal mini
+  game and his hide and seek (tree, bush, trampoline; the teleportation
+  bug seeks). Both in `docs/pitch.md`.
+- Testing happens on the laptop (keyboard) and the iPad (touch): check
+  both sizes (1440x900 and 1024x768) for anything visual.
 - Open question for Gareth: saving (gems and helpers reset when the game
   closes). Charlie's next idea after the rebuild: dragons, islands, the
   talking sword, or more drawings.

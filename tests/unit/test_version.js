@@ -16,7 +16,7 @@ test("the game has a name", () => {
 test("index.html is stamped with the current version", async () => {
   const html = await (await fetch("../index.html", { cache: "no-store" })).text();
   const map = JSON.parse(/<script type="importmap">([\s\S]*?)<\/script>/.exec(html)[1]).imports;
-  const files = ["main", "version", "layout", "walk", "controls", "input", "art", "hud", "playtest", "attacks"];
+  const files = ["main", "version", "layout", "walk", "controls", "input", "art", "hud", "playtest", "attacks", "baddie_brain", "baddies", "waves", "gems"];
   for (const f of files) assert.eq(map[`./js/${f}.js`], `./js/${f}.js?v=${VERSION}`, f);
   assert.ok(html.includes(`css/style.css?v=${VERSION}`), "the stylesheet too");
   assert.ok(html.includes(`js/main.js?v=${VERSION}"`), "and the first script");

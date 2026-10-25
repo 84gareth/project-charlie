@@ -83,6 +83,13 @@ game you can do whenever you want." Drawings: `drawings/minigame_ball.jpg`
 (a black ball) and `drawings/minigame_goal.jpg` (a net). Not yet on the
 roadmap: waiting for Gareth's OK on where it goes.
 
+## Charlie's hide and seek (drawn 2026-10-25)
+"These are three hide and seek locations, a tree and a bush and a
+trampoline you can jump on. The seeker is the teleportation bug. You can
+hide behind the tree or bush or jump on the trampoline so people can't see
+you." Drawing: `drawings/hideseek_tree_bush_trampoline.jpg`. Not yet on
+the roadmap: waiting for Gareth's OK on where it goes.
+
 ## Keep it right for a 5-year-old
 Cartoon fighting only: bonks and swooshes, no blood, nothing scary. Baddies
 sink into the ground rather than anything grim. The game must play without

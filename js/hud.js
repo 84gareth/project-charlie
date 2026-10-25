@@ -1,7 +1,7 @@
 // Things drawn on top of the street in screen pixels, not world units: the
 // on-screen joystick and the sword and hammer buttons.
 import { STICK_RADIUS, buttons } from "./controls.js";
-import { circle, line, rect } from "./art.js";
+import { circle, line, rect, drawGemShape } from "./art.js";
 
 const RING = "rgba(255, 255, 255, 0.35)";
 const KNOB = "rgba(255, 255, 255, 0.7)";
@@ -55,4 +55,17 @@ function drawHammerIcon(ctx, x, y) {
   ctx.rotate(Math.PI / 4);
   rect(ctx, -26, -15, 52, 30, "#737885");
   ctx.restore();
+}
+
+// The gem counter, top left: a big gem and the number, no words.
+export function drawGemCounter(ctx, count) {
+  drawGemShape(ctx, 52, 56, 1.4);
+  ctx.font = "bold 54px ui-rounded, system-ui, sans-serif";
+  ctx.textBaseline = "middle";
+  ctx.lineJoin = "round";
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = "#261a40";
+  ctx.strokeText(String(count), 92, 60);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(String(count), 92, 60);
 }

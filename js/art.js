@@ -266,3 +266,154 @@ function drawLyingDown(ctx, h, now) {
     circle(ctx, -68 + Math.cos(a) * 40, -80 + Math.sin(a) * 12, 8, GOLD);
   }
 }
+
+// ─── Charlie's bugs (simple shapes from his drawings, until their real
+//     pictures are made) ───────────────────────────────────────────────────
+
+const BUG_INK = "#1c1a24";
+const WHITE = "#ffffff";
+
+// A baddie: b.x, b.y is its spot on the street; b.kind, b.facing,
+// b.hurt (wobbling, drawn pale), b.sink (0 to 1, into the ground),
+// b.hover (how high it floats).
+export function drawBaddie(ctx, b, now = 0) {
+  const sink = b.sink || 0;
+  // Fliers drop to the street as they're beaten, then sink.
+  const lift = (b.hover || 0) * (1 - Math.min(1, sink * 3)) + Math.sin(now * 5 + b.x * 0.01) * (b.hover ? 6 : 0);
+  ctx.save();
+  ctx.translate(b.x, b.y);
+  const hole = sink > 0 ? `rgba(26, 20, 31, ${0.3 + sink * 0.6})` : "rgba(0, 0, 0, 0.25)";
+  ellipse(ctx, 0, 0, 46 + sink * 10, (46 + sink * 10) * 0.3, hole);
+  // Everything below the street line is hidden, so sinking looks right.
+  ctx.beginPath();
+  ctx.rect(-400, -600, 800, 600);
+  ctx.clip();
+  const wobble = b.hurt ? Math.sin(now * 60) * 6 : 0;
+  ctx.translate(wobble, -lift + sink * 170);
+  ctx.scale(b.facing || 1, 1);
+  if (b.hurt) ctx.globalAlpha = 0.55;
+  if (b.kind === "house_bug") drawHouseBug(ctx, now);
+  else if (b.kind === "acorn") drawAcorn(ctx, now);
+  else drawTeleportBug(ctx, now);
+  ctx.restore();
+}
+
+// Black square body, two striped pale blue wings, five dangly tentacles.
+function drawHouseBug(ctx, now) {
+  const flap = Math.sin(now * 18) * 0.25;
+  for (const side of [-1, 1]) {
+    ctx.save();
+    ctx.translate(side * 22, -95);
+    ctx.rotate(side * (0.6 + flap));
+    ellipse(ctx, 0, -42, 22, 46, "rgba(170, 205, 245, 0.9)");
+    ctx.strokeStyle = BUG_INK;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.ellipse(0, -42, 22, 46, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    for (const y of [-70, -52, -34, -16]) line(ctx, { x: -20, y }, { x: 20, y: y - 6 }, BUG_INK, 4);
+    ctx.restore();
+  }
+  for (let i = 0; i < 5; i++) {
+    const x = -24 + i * 12;
+    const sway = Math.sin(now * 4 + i) * 8;
+    ctx.strokeStyle = BUG_INK;
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(x, -78);
+    ctx.quadraticCurveTo(x + sway, -40, x + sway * 1.5, -8);
+    ctx.stroke();
+  }
+  rect(ctx, -30, -122, 60, 50, BUG_INK);
+  circle(ctx, 8, -102, 6, WHITE);
+  circle(ctx, 22, -102, 6, WHITE);
+}
+
+// A brown acorn with a dark cap, two rounded wings and five thin legs.
+function drawAcorn(ctx, now) {
+  const flap = Math.sin(now * 14) * 0.2;
+  for (let i = 0; i < 5; i++) {
+    const x = -16 + i * 8;
+    line(ctx, { x, y: -40 }, { x: x + (i - 2) * 9, y: -2 }, BUG_INK, 5);
+  }
+  for (const side of [-1, 1]) {
+    ctx.save();
+    ctx.translate(side * 30, -110);
+    ctx.rotate(side * (0.15 + flap));
+    ellipse(ctx, side * 30, 0, 34, 18, "#8a4b38");
+    ctx.strokeStyle = BUG_INK;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.ellipse(side * 30, 0, 34, 18, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+  ctx.fillStyle = "#9a5440";
+  ctx.strokeStyle = BUG_INK;
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(0, -38);
+  ctx.bezierCurveTo(-46, -70, -44, -140, 0, -150);
+  ctx.bezierCurveTo(44, -140, 46, -70, 0, -38);
+  ctx.fill();
+  ctx.stroke();
+  rect(ctx, -26, -170, 52, 24, "#3a2a22");
+  rect(ctx, -4, -182, 8, 14, "#3a2a22");
+  circle(ctx, 4, -112, 5, BUG_INK);
+  circle(ctx, 18, -112, 5, BUG_INK);
+  line(ctx, { x: 2, y: -124 }, { x: 12, y: -120 }, BUG_INK, 4);
+  line(ctx, { x: 22, y: -124 }, { x: 14, y: -120 }, BUG_INK, 4);
+}
+
+// A tall leaning purple body with a dark band at the top and two arms.
+function drawTeleportBug(ctx, now) {
+  const sway = Math.sin(now * 3) * 0.05;
+  ctx.save();
+  ctx.rotate(0.12 + sway);
+  for (const side of [-1, 1]) {
+    ctx.save();
+    ctx.translate(side * 22, -130);
+    ctx.rotate(side * 0.7);
+    ellipse(ctx, side * 18, -14, 26, 16, "#5b2fc4");
+    ctx.strokeStyle = BUG_INK;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.ellipse(side * 18, -14, 26, 16, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+  ctx.fillStyle = "#5b2fc4";
+  ctx.strokeStyle = BUG_INK;
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.roundRect(-26, -200, 52, 196, 26);
+  ctx.fill();
+  ctx.stroke();
+  rect(ctx, -23, -180, 46, 16, "#2a1660");
+  circle(ctx, 4, -150, 5, WHITE);
+  circle(ctx, 16, -150, 5, WHITE);
+  ctx.restore();
+}
+
+// ─── Gems ──────────────────────────────────────────────────────────────────
+
+const GEM_FACE = rgb(0.98, 0.35, 0.65);
+const GEM_LIGHT = rgb(1, 0.7, 0.85);
+
+// A shiny pink diamond with a sparkle at (x, y), `size` times normal.
+export function drawGemShape(ctx, x, y, size = 1) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(size, size);
+  polygon(ctx, [[0, -26], [22, -6], [0, 26], [-22, -6]], GEM_FACE);
+  polygon(ctx, [[0, -26], [22, -6], [0, -6], [-22, -6]], GEM_LIGHT);
+  circle(ctx, -7, -14, 4, "rgba(255, 255, 255, 0.9)");
+  ctx.restore();
+}
+
+// A gem lying on the street, bobbing gently over its shadow.
+export function drawGem(ctx, g, now = 0) {
+  ellipse(ctx, g.x, g.y, 22, 22 * 0.3, "rgba(0, 0, 0, 0.25)");
+  drawGemShape(ctx, g.x, g.y - 30 - Math.sin(now * 5 + g.x) * 8);
+}
