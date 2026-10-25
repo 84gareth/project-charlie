@@ -77,6 +77,7 @@ test("two hits sink it and leave a gem worth 10", async () => {
 test("beating a wave brings the next", async () => {
   const page = await start();
   run(page, Waves.PAUSE + 0.1);
+  run(page, 1.5);   // the Acorn bad guy drops out of its tree first
   const first = [...page.game.baddies];
   first.forEach((b, i) => b.takeHit(HP, 900 + i, b.x, { x: 0, y: 0, w: 99999, h: 99999 }));
   run(page, SINK_TIME + Waves.PAUSE + 0.2);
@@ -124,4 +125,21 @@ test("in the page, the teleportation bug pops up behind the hero", async () => {
   assert.eq(b.state, "vanish", "puff");
   run(page, 0.5);
   assert.lt(b.x, h.x, "now behind the hero (who faces right)");
+});
+
+test("each wave's Acorn bad guy hides in the nearest tree, then drops on you", async () => {
+  const page = await start();
+  run(page, Waves.PAUSE + 0.05);
+  const acorn = page.game.baddies.find((b) => b.kind === "acorn");
+  assert.ok(acorn.inTree(), "hiding in the tree");
+  assert.eq(acorn.x, 600, "the tree nearest the start");
+  run(page, 1.5);
+  assert.notOk(acorn.inTree(), "dropped");
+  assert.eq(acorn.drop, 0, "down on the street");
+});
+
+test("Charlie's tree picture loads", async () => {
+  const page = await start();
+  await until(() => page.treePicture.complete, "tree loaded");
+  assert.gt(page.treePicture.naturalWidth, 100);
 });

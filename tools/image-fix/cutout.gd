@@ -11,7 +11,10 @@ extends SceneTree
 # drawing and scales it to HEIGHT pixels tall.
 #
 #   Godot --headless --path tools/image-fix --script res://cutout.gd -- \
-#       <in.jpg> <out.png> [erase=x,y;x,y;...] [grow=N] [sat=N]
+#       <in.jpg> <out.png> [crop=x,y,w,h] [erase=x,y;x,y;...] [grow=N] [sat=N]
+#
+# crop= takes one drawing from a page with several (applied first, so
+# erase= points are then in the cropped picture's pixels).
 #
 # erase= paints a polygon (photo pixels) with plain paper first: for the
 # tablecloth showing in a corner of the photo.
@@ -94,6 +97,11 @@ func _initialize() -> void:
 	var a := OS.get_cmdline_user_args()
 	var img := Image.load_from_file(a[0])
 	img.convert(Image.FORMAT_RGBA8)
+	for extra in a.slice(2):
+		if extra.begins_with("crop="):
+			# Just one thing from a page with several: x,y,w,h in photo pixels.
+			var r := extra.substr(5).split(",")
+			img = img.get_region(Rect2i(int(r[0]), int(r[1]), int(r[2]), int(r[3])))
 	for extra in a.slice(2):
 		if extra.begins_with("erase="):
 			erase_polygon(img, extra.substr(6))

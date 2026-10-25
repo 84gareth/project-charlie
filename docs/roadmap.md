@@ -76,8 +76,8 @@ carries over unchanged.
      soon after: the scare (v0.13.0)
    - the house bug grabs you with its tentacles and you tap a button
      three times to get free (Charlie is drawing the button)
-   - the Acorn bad guy drops from trees (the street has none yet: maybe
-     Charlie's hide and seek tree)
+   - ✅ the Acorn bad guy hides in one of Charlie's trees (his hide and
+     seek drawing, five along the street) and drops on you (v0.14.0)
 6. Pick a boy or a girl at the start
 7. Charlie's three helpers, their powers and hearts
 - Gate: Charlie plays it on his iPad and says whether it's as fun

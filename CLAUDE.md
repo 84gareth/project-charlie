@@ -272,11 +272,13 @@ Updated 2026-10-25 (v0.9.0).
   in the photo and `sat=` if the paper looks blue.
 - **Step 4 done (v0.12.0):** hearts, punches, falling down (`js/fight.js`).
 - **Step 5 in progress:** the teleportation bug's teleport is done
-  (v0.13.0; `TELEPORT` and `teleportSpot` in `js/baddies.js`). Still to
-  come: the house bug's grab (needs Charlie's button drawing) and the
-  Acorn dropping from trees (needs trees).
-- **Next:** whichever of those Charlie and Gareth pick, then the pick
-  screen and the helpers (roadmap order). Open for Gareth: helpers as
+  (v0.13.0; `TELEPORT` and `teleportSpot` in `js/baddies.js`). The Acorn
+  dropping from Charlie's trees is done (v0.14.0; `TREES` in
+  `js/layout.js`, `TREE_DROP` in `js/baddies.js`, the tree cut from his
+  hide and seek drawing with `cutout.gd crop=`). Still to come: the house
+  bug's grab (needs Charlie's button drawing).
+- **Next:** the house bug's grab once the button is drawn; otherwise the
+  pick screen and the helpers (roadmap order). Open for Gareth: helpers as
   Charlie's plain drawings instead of the 3D renders?
 - **Waiting for Gareth's OK on placement:** Charlie's ball-and-goal mini
   game and his hide and seek (tree, bush, trampoline; the teleportation

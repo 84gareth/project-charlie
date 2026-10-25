@@ -39,3 +39,15 @@ export function view(w, h) {
 export function cameraX(heroX, viewWidth) {
   return clamp(heroX - viewWidth / 2, 0, Math.max(0, WORLD_WIDTH - viewWidth));
 }
+
+// Charlie's trees (his hide and seek drawing) along the back of the
+// pavement, where the Acorn bad guy hides before dropping on you.
+export const TREES = [600, 1500, 2400, 3300, 4200];
+// Where a tree's trunk stands, and how tall it's drawn.
+export const TREE_BASE_Y = 598;
+export const TREE_HEIGHT = 380;
+
+// The tree an Acorn bad guy hides in: the nearest one to the hero.
+export function nearestTree(heroX) {
+  return TREES.reduce((best, x) => (Math.abs(x - heroX) < Math.abs(best - heroX) ? x : best));
+}

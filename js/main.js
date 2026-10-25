@@ -8,7 +8,7 @@
 // For tests: window.game is the game's state and window.gameTick(dt) steps
 // it by hand; with ?manual=1 in the address the game doesn't run by itself.
 import { GAME_NAME, VERSION } from "./version.js";
-import { WALK_AREA, HERO_START, view, cameraX } from "./layout.js";
+import { WALK_AREA, HERO_START, TREES, TREE_BASE_Y, TREE_HEIGHT, view, cameraX, nearestTree } from "./layout.js";
 import * as Walk from "./walk.js";
 import { AttackState, hits } from "./attacks.js";
 import { DAMAGE, FIRST_PUNCH, STAGGER } from "./baddie_brain.js";
@@ -16,7 +16,7 @@ import { Baddie, HOVER } from "./baddies.js";
 import * as Waves from "./waves.js";
 import { touching } from "./gems.js";
 import { FightState, MAX_HEARTS, DOWN_TIME, bumpedX } from "./fight.js";
-import { drawStreet, drawHero, drawBaddie, drawGem, loadBugPictures } from "./art.js";
+import { drawStreet, drawHero, drawBaddie, drawGem, drawTree, loadBugPictures, loadTreePicture } from "./art.js";
 import { drawControls, drawGemCounter, drawHearts } from "./hud.js";
 import { createInput } from "./input.js";
 import { options } from "./playtest.js";
@@ -26,6 +26,7 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const input = createInput(canvas);
 const bugPictures = loadBugPictures(VERSION);
+const treePicture = loadTreePicture(VERSION);
 
 const game = {
   mode: opts.mode,
@@ -59,7 +60,11 @@ const game = {
   startWave(startDist = Waves.OFFSCREEN) {
     game.waveWait = 0;
     Waves.spawnPoints(game.hero.x, WALK_AREA, Waves.SIZE, startDist).forEach((p, i) => {
-      const b = game.spawnBaddie(Waves.kind(i), p.x, p.y, Waves.lane(i));
+      const kind = Waves.kind(i);
+      // The Acorn bad guy hides up the nearest tree and drops on you.
+      const at = kind === "acorn" ? { x: nearestTree(game.hero.x), y: WALK_AREA.y + 20 } : p;
+      const b = game.spawnBaddie(kind, at.x, at.y, Waves.lane(i));
+      if (kind === "acorn") b.hideInTree();
       b.punchWait = FIRST_PUNCH + i * STAGGER;
     });
   },
@@ -171,15 +176,22 @@ function draw() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.setTransform(dpr * v.scale, 0, 0, dpr * v.scale, -game.camX * dpr * v.scale, v.top * dpr);
   drawStreet(ctx, game.camX, v.width);
+  const looks = (b) => ({
+    x: b.x, y: b.y, kind: b.kind, facing: b.facing, hurt: b.state === "hurt",
+    pose: b.state === "windup" || b.state === "punch" ? b.state : "",
+    sink: b.sinkAmount(), hover: HOVER[b.kind],
+    pop: b.popScale(), drop: b.drop, sparkle: b.teleporting(),
+  });
+  // Acorns hiding in a tree go behind its leaves; the trees stand at the
+  // back of the pavement, behind everyone else.
+  for (const b of game.baddies) if (b.inTree()) drawBaddie(ctx, looks(b), game.time);
+  for (const x of TREES) {
+    if (x > game.camX - 200 && x < game.camX + v.width + 200) drawTree(ctx, x, TREE_BASE_Y, TREE_HEIGHT);
+  }
   // Back of the street first, so nearer things stand in front.
   const things = [
     ...game.looseGems.map((g) => ({ y: g.y, draw: () => drawGem(ctx, g, game.time) })),
-    ...game.baddies.map((b) => ({ y: b.y, draw: () => drawBaddie(ctx, {
-      x: b.x, y: b.y, kind: b.kind, facing: b.facing, hurt: b.state === "hurt",
-      pose: b.state === "windup" || b.state === "punch" ? b.state : "",
-      sink: b.sinkAmount(), hover: HOVER[b.kind],
-      pop: b.popScale(), drop: b.drop, sparkle: b.teleporting(),
-    }, game.time) })),
+    ...game.baddies.filter((b) => !b.inTree()).map((b) => ({ y: b.y, draw: () => drawBaddie(ctx, looks(b), game.time) })),
     { y: game.hero.y, draw: () => drawHero(ctx, game.hero, game.time) },
   ].sort((a, b) => a.y - b.y);
   for (const t of things) t.draw();
@@ -203,6 +215,7 @@ game.camX = cameraX(game.hero.x, view(canvas.clientWidth, canvas.clientHeight).w
 if (opts.mode === "fight") game.startWave(Waves.CLOSE);
 window.game = game;
 window.bugPictures = bugPictures;
+window.treePicture = treePicture;
 window.gameTick = (dt) => { tick(dt); draw(); };
 if (opts.manual) draw();
 else requestAnimationFrame(frame);

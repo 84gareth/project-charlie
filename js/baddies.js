@@ -31,6 +31,16 @@ export const TELEPORT = {
   ORDER: ["behind", "above", "front"],
 };
 
+// ─── The Acorn bad guy's drop from a tree ─────────────────────────────────
+// Charlie: "They drop from trees and attack you and can fly too." It
+// starts hidden up in one of Charlie's trees, waits a moment, then drops
+// to the street (it can't be hit until it's down) and flies at you.
+export const TREE_DROP = {
+  WAIT: 0.8,      // seconds hiding in the tree
+  FALL: 0.5,      // seconds to drop down
+  HEIGHT: 190,    // how far above its flying height it hides
+};
+
 // Where the teleportation bug pops up: beside the hero, behind or in
 // front of where they're facing (from above, it drops in front), kept on
 // the street.
@@ -74,8 +84,17 @@ export class Baddie {
 
   // Hit by attack number `attackId` from someone standing at `fromX`.
   // True if it counted. A hit stops a wind-up.
+  // Up in a tree (hidden), then dropping from it.
+  hideInTree() {
+    this.drop = TREE_DROP.HEIGHT;
+    this.enter("tree");
+  }
+
+  inTree() { return this.state === "tree"; }
+
   takeHit(damage, attackId, fromX, area) {
-    if (!this.alive() || this.state === "vanish" || this.hitBy.has(attackId)) return false;
+    if (!this.alive() || this.hitBy.has(attackId)) return false;
+    if (["vanish", "tree", "fall"].includes(this.state)) return false;
     this.hitBy.add(attackId);
     this.hp -= damage;
     this.x = clamp(this.x + Math.sign(this.x - fromX) * Brain.KNOCKBACK, area.x, area.x + area.w);
@@ -108,6 +127,19 @@ export class Baddie {
           }
         }
         break;
+      case "tree":
+        if (this.timer >= TREE_DROP.WAIT) this.enter("fall");
+        break;
+      case "fall": {
+        // Speeding up as it falls.
+        const k = Math.min(1, this.timer / TREE_DROP.FALL);
+        this.drop = TREE_DROP.HEIGHT * (1 - k * k);
+        if (k >= 1) {
+          this.drop = 0;
+          this.enter("walk");
+        }
+        break;
+      }
       case "vanish":
         if (this.timer >= TELEPORT.VANISH) {
           this.x = this.goingTo.x;

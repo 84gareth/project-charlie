@@ -474,3 +474,26 @@ export function drawGem(ctx, g, now = 0) {
   ellipse(ctx, g.x, g.y, 22, 22 * 0.3, "rgba(0, 0, 0, 0.25)");
   drawGemShape(ctx, g.x, g.y - 30 - Math.sin(now * 5 + g.x) * 8);
 }
+
+// ─── Charlie's tree ────────────────────────────────────────────────────────
+// From his hide and seek drawing, cut out like the bugs. A simple trunk and
+// cloud of leaves stands in while it loads.
+let TREE_PICTURE = null;
+
+export function loadTreePicture(version) {
+  TREE_PICTURE = new Image();
+  TREE_PICTURE.src = `assets/scenery/tree.png?v=${version}`;
+  return TREE_PICTURE;
+}
+
+// A tree standing with its trunk at (x, baseY), `height` tall.
+export function drawTree(ctx, x, baseY, height) {
+  const pic = TREE_PICTURE;
+  if (pic && pic.complete && pic.naturalWidth > 0) {
+    const w = (height * pic.naturalWidth) / pic.naturalHeight;
+    ctx.drawImage(pic, x - w / 2, baseY - height, w, height);
+    return;
+  }
+  rect(ctx, x - 10, baseY - height * 0.5, 20, height * 0.5, "#6b4a2b");
+  ellipse(ctx, x, baseY - height * 0.65, height * 0.3, height * 0.3, "#5aa65a");
+}
