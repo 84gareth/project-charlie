@@ -1,10 +1,17 @@
 # Project Charlie — Working Rules for Claude Code
 
-A brand new game that **Charlie (aged 5) designs** with his dad, Gareth,
-built in Godot 4.x as a structured AI-assisted learning project. It is
-separate from Gareth's other games, and from his brother Sam's game
-(Project Sam); nothing is shared between them at runtime. See
+A game that **Charlie (aged 5) designs** with his dad, Gareth, built as a
+**web page he plays on his iPad**, as a structured AI-assisted learning
+project. It is separate from Gareth's other games, and from his brother
+Sam's game (Project Sam); nothing is shared between them at runtime. See
 `docs/roadmap.md` for where we are.
+
+The game was first built in Godot (v0.1.0 to v0.8.0). On 2026-10-25
+Gareth asked for it on Charlie's iPad "like Sam's game", and chose to
+rebuild it as a plain web page rather than export it from Godot. The Godot
+game is kept in `archive/godot/` (git tag `godot-v0.8.0`); it still runs
+and passes its tests, and it is the reference for every rule and number
+being carried over.
 
 ## THE CRITICAL RULE: talk so a 5-year-old can read it
 Set up 2026-09-26, the same as Project Sam's rule but simpler still, because
@@ -30,56 +37,71 @@ with him, gives the ideas and picks from the choices. Charlie is the game
 designer: the ideas, the names, the look and the "is it fun?" call are his.
 Gareth is the producer: he keeps the project on track, approves the roadmap,
 and handles anything outside the game (GitHub, downloads, accounts). Neither
-is a day-job programmer. Save Godot detail for "DAD" replies, commits and
-docs.
+is a day-job programmer. Save technical detail for "DAD" replies, commits
+and docs.
 
 These rules are carried over from Project Sam (`~/Projects/Project Sam`),
 Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
 (`~/Projects/project-two`), where they were learned the hard way.
 
 ## Environment
-- Godot 4.7.2 at `~/Downloads/Godot.app`, **Compatibility renderer** for now
-  (revisit once we know what the game is). Godot IS runnable from Claude's
-  shell, headless or windowed.
-- **Windowed captures:** anything visual gets checked by opening a real
-  window and saving screenshots to `captures/`, because headless can't
-  render. Run with `--always-on-top`: if the window ends up behind others,
-  macOS stops it drawing and every screenshot after the first is the same
-  stale frame (Project Two, 2026-09-24). Movie maker is the easy way:
-  `--write-movie captures/x.png --fixed-fps 30 --quit-after N`, with a
-  helper scene in `tools/` to press buttons (see `tools/walk_capture.gd`).
-- **The guard matches `; open(` in shell text** (it thinks it's the macOS
-  `open` command), so a Python heredoc that opens a file gets blocked. Edit
-  files with the Edit tool instead.
-- GDScript only (never C#)
-- macOS local development
-- Git from day one, `main` branch, backed up to
-  github.com/84gareth/project-charlie (private). No `gh` CLI on this
-  machine: git itself pushes fine, but anything else on GitHub goes through
-  Claude in Chrome, where Gareth is signed in.
+- **A plain web page: HTML, CSS and JavaScript, no build step, no
+  libraries**, the same as Project Sam. Open `index.html` and that's the
+  game. JavaScript modules (`import`/`export`) need the page served over
+  http, not opened as a file (`tools/playtest.sh` serves it).
+- **Plays on Charlie's iPad, in Safari.** Touch first: a joystick under
+  the left thumb, sword and hammer buttons on the right. Keyboard (for the
+  Mac) and Xbox or Switch controllers (iPads support them) work too. Design
+  for a landscape iPad; it must still work held upright.
+- The whole game is drawn on one `<canvas>` in world units (the Godot
+  game's pixels: a 4800 by 900 street); `js/layout.js` `view()` fits it to
+  the screen, always the full height and at least 1200 across.
+- **Published with GitHub Pages:** https://84gareth.github.io/project-charlie/
+  (the repo is PUBLIC since 2026-10-25, Gareth's call, like Sam's). Every
+  push to `main` updates it within a minute or two. Never put anything
+  private in the repo: no surnames, school, photos of people.
+- No Node or npm on this Mac. Python 3 and Google Chrome are here. Godot
+  4.7.2 (`~/Downloads/Godot.app`) and Blender are here for the archive and
+  the art pipeline.
+- Git from day one, `main` branch, github.com/84gareth/project-charlie. No
+  `gh` CLI: git pushes fine; anything else on GitHub goes through Claude in
+  Chrome, where Gareth is signed in.
+- **Look at it for real** in the built-in browser at iPad size
+  (`resize_window` 1024x768), served by `python3 -m http.server` on a FREE
+  port in the background (8123 was taken by Project Sam's server on
+  2026-10-25, and the pane showed Sam's game). The pane only draws while
+  it's on screen, so take a screenshot to let a frame through. Pretend a
+  touch with `PointerEvent`s (`pointerType: "touch"`) to see the on-screen
+  controls. Screenshots worth keeping go in `captures/` (gitignored).
+- **Art pipeline (from the Godot days, still the way):** Charlie's drawing
+  → Gemini (Gareth, web UI) → Meshy image-to-3D (`meshy-job`, symlinked
+  from Project 2126; `MESHY_API_KEY` is in the environment; EVERY job costs
+  credits, so ask before re-rolling) → `tools/helper_sprite.py` (headless
+  Blender) → a PNG in `assets/`. Raw photos go in `drawings/`.
 
 ## How we work
 
-1. **Read before you edit.** Understand the current state of a file, and the
-   scenes/signals it's wired to, before changing it.
+1. **Read before you edit.** Understand the current state of a file, and
+   what calls it, before changing it.
 2. **Be direct about failures. Never ship broken code.** If something doesn't
    work, say so plainly. Don't claim success you haven't checked.
 3. **Tests before trust.** We follow `docs/process.md`: **interview → spec
    before code**, and **when you claim something works, a test must confirm
    it**. Claude runs `./run_tests.sh` itself before reporting results. Two
-   lanes: `tests/unit/` (pure logic, fast) and `tests/live/` (real nodes in a
-   real scene tree). Pull game logic into pure, seeded, Godot-independent
-   scripts so it's unit-testable. Green means "the tested logic is correct",
-   not "done": **Charlie playing it is the real gate for anything visual or
-   interactive.** Mutation-check new tests of game logic (break the code,
-   watch the test fail).
+   lanes: `tests/unit/` (pure logic) and `tests/live/` (the real page in an
+   iPad-sized frame). Keep game rules in pure modules that don't touch the
+   page, so they're unit-testable. Live tests open the page with
+   `?manual=1` and step it with `page.gameTick(dt)`, never waiting on
+   animation frames. Green means "the tested logic is correct", not
+   "done": **Charlie playing it on the iPad is the real gate for anything
+   visual or interactive.** Mutation-check new tests of game logic (break
+   the code, watch the test fail).
 4. **Keep the loop VERY fast.** A 5-year-old's attention is the scarcest
    thing here: get something new on screen in minutes, not hours. Prefer
    many tiny changes Charlie can see over one big one. Use
    `./run_tests.sh --only=<name>` while iterating. Run the full suite once,
-   before the final push of a request that touches game logic. Never run the
-   full suite to look at one test. If a task will take more than ~5
-   minutes, say so BEFORE starting.
+   before the final push of a request that touches game logic. If a task
+   will take more than ~5 minutes, say so BEFORE starting.
 5. **Time-box debugging, then report.** Two or three focused attempts; if it
    isn't root-caused, STOP and report what's known, what was ruled out, and
    the best next idea. Stop immediately if the same code gives different
@@ -87,15 +109,16 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
    about process ("why did that take so long?") wants an answer, not another
    investigation.
 6. **Bump the version on every gameplay change.** Single source of truth:
-   `config/version` in `project.godot` (read it with
-   `ProjectSettings.get_setting("application/config/version")`).
+   `VERSION` in `js/version.js`. **Then run `python3 tools/stamp.py`**: it
+   stamps the version onto every file index.html loads, so the iPad fetches
+   the new copy (a test fails if you forget, and lists every module).
 7. **When you suggest options, number them** so Charlie can pick by number.
    Two or three options at most, a few words each.
-8. **No emoji in game UI.** Plain text or proper in-engine icons. (Chat-status
-   emoji in rule 10 are fine.)
+8. **No emoji in game UI.** Pictures drawn on the canvas, never words a
+   5-year-old has to read. (Chat-status marks in rule 10 are fine.)
 9. **One change at a time, each landing at a runnable state.** Small commits,
    descriptive messages. Commit after each working step, then push straight
-   away without being asked.
+   away without being asked. (Pushing also publishes the game.)
 10. **Every update follows THE CRITICAL RULE above**: 5-year-old reading
     level, tiny, what changed in the GAME. Each heading gets ONE short
     sentence. Technical detail belongs in commit messages and docs.
@@ -110,20 +133,18 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
       4. **What's next**
       5. **Model and effort level required**, e.g. `Opus 5.5 · high`.
     - Never use the phrase "load-bearing". Say the actual thing.
-    - **EVERY update ends with a launch block** (Gareth, 2026-09-26;
-      widened 2026-09-27 to every update, not just ones with something
-      new): the very end of the message is a `bash` code block that cds
-      into this folder and runs `tools/playtest.sh` with the mode that
-      shows the newest thing (`street` when nothing changed), so the Run
-      button starts the game. After the five headings, nothing after:
+    - **EVERY update ends with the link to play** (Gareth, 2026-09-26;
+      widened 2026-09-27 to every update): after the five headings, the
+      iPad link (https://84gareth.github.io/project-charlie/) and a `bash`
+      code block that runs the launcher with the mode that shows the newest
+      thing (`street` when nothing changed), so the Run button starts it:
       ```bash
       cd "/Users/gareth/Projects/Project Charlie" && tools/playtest.sh fight
       ```
-      Modes: `street` (normal game, from the pick screen), `practice`
-      (no baddies), `fight` (a wave straight away), `helpers` (700 gems,
-      all three helpers, a wave straight away), `editor`; add `boy` or
-      `girl` to skip the pick screen. Add a mode to the launcher (and
-      `scripts/playtest_args.gd`) when a new screen or mode needs one.
+      Modes: `street` (normal game), `practice` (no baddies), `fight` (a
+      wave straight away), `helpers` (700 gems, all three helpers), `tests`
+      (the test page); add `boy` or `girl` for that hero. Add a mode to the
+      launcher (and `js/playtest.js`) when a new screen or mode needs one.
 11. **Work the roadmap in order; don't silently insert.** `docs/roadmap.md` is
     the single ordered list. When something new comes up, propose where it
     goes and get an OK before adding it.
@@ -149,9 +170,9 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
   Nothing scary, gory, mean or grown-up; bumping, bouncing and "oops, try
   again" are fine.
 - **Playable by a 5-year-old.** The game must never need reading to play:
-  pictures, colours and sounds carry the meaning. Big targets, a few simple
-  controls (mouse clicks or a handful of keys), and no way to get stuck or
-  lose everything.
+  pictures, colours and sounds carry the meaning. Big targets (buttons at
+  least 60 px), a few simple controls, and no way to get stuck or lose
+  everything.
 - **Never ask Charlie for personal details** (full name, school, address,
   photos). Anything outside the game itself (GitHub, downloads, accounts,
   sharing the game, anything that costs money) needs Gareth's OK.
@@ -167,25 +188,25 @@ is OFF on purpose (it broke pushing and windowed Godot captures in Project
 2126); don't propose turning it back on. The guard matches on command TEXT:
 a shell command (even a commit message) that names the limits files' path
 alongside `>`, `cp`, `mv`, `tee` or `python` is blocked, so describe them in
-words instead (Project Sam, 2026-09-26).
+words instead (Project Sam, 2026-09-26). It also blocks `rm -rf` (so the
+leftover `.godot/` cache at the root stays; it's gitignored) and any
+`; open(` in shell text, so a Python heredoc that opens a file is refused:
+edit files with the Edit tool.
 
-## Godot conventions for this project
-- Compose prefabs as `.tscn` scenes; don't build everything in code. Scripts
-  drive behaviour; scenes define structure.
-- Signals over polling.
-- Type your variables (`var hp: int = 100`).
-- Flat structure while we're learning: `scenes/`, `scripts/`, `assets/`,
-  plus `tools/` (asset generators and capture scenes).
-- **`preload`, not `class_name`**, for logic modules
-  (`const Foo = preload("res://scripts/foo.gd")`). A new `class_name` isn't
-  registered until the editor rescans, so headless test runs can't see it.
-- **Add autoloads by editing `project.godot` by hand**, as
-  `Name="*res://scripts/foo.gd"`. The Project Settings UI writes a
-  `uid://` reference that fails to resolve at runtime.
-- **Screenshots and captures go in `captures/`** (gitignored, and Godot
-  won't import from it), never the project root. Project 2126's root filled
-  up with ~150 of them.
-- Commit the `.uid` files Godot generates next to scripts.
+## Web conventions for this project
+- `index.html` at the root (GitHub Pages serves it). `js/` for code (ES
+  modules), `css/` for styles, `assets/` for pictures.
+- Game rules live in pure modules (no `document`, no timers) so unit tests
+  can import them: `layout.js`, `walk.js`, `controls.js`, `playtest.js`,
+  and more as the rebuild goes on. The page code (`main.js`, `input.js`,
+  `art.js`, `hud.js`) only draws and listens.
+- Every test file is listed in `tests/index.html`; the runner fails a file
+  that doesn't load or registers no tests.
+- Touch: Pointer Events (`pointerdown`/`pointermove`/`pointerup`), not
+  mouse events. Buttons at least 60 px. `touch-action: none` on the game so
+  Safari doesn't scroll or zoom.
+- Carry numbers over from the Godot game unchanged unless Charlie or Gareth
+  asks; its pure scripts in `archive/godot/scripts/` are the reference.
 
 ## Don't add what wasn't asked for
 In Project Two, sound effects went in unasked and stayed through five
@@ -194,10 +215,9 @@ request to build it now. If a phase seems to need something Charlie or
 Gareth hasn't asked for, ask first.
 
 ## Check the view that matters
-For anything visual, capture the places where things MEET (a character and
-the ground, two tiles, the edge of the screen), close up, before calling it
-done. In Project Two, rivers were judged from far away and shipped with
-broken river mouths nobody had looked at.
+For anything visual, look where things MEET (a character and the ground,
+the on-screen buttons and the street, the iPad's rounded corners and home
+bar), close up, at iPad size, before calling it done.
 
 ## What matters most (hold us to this)
 Make the core game FUN before making anything NICE. The biggest risk is
@@ -206,71 +226,42 @@ fun to play again and again. If you catch us doing that, push back and say
 so, kindly.
 
 ## Project landmines (things that have bitten us — check before repeating)
-- **Never put a freed node into a typed variable** (e.g. `for w: Node2D
-  in list` when the list may hold freed nodes): it's a script error that
-  stops the whole function every frame. Read the list untyped and check
-  `is_instance_valid` first (`main.gd` `_roll_waves`).
-- **Don't pipe a windowed Godot run into `head`.** It closes the pipe and
-  kills Godot mid-recording. Send output to a file or `/dev/null`.
-- **`sips --cropOffset 0 0` is ignored** (it crops from the centre). To
-  look at the HUD corner, read the full frame.
-- **Both test runners trap SCRIPT and SHADER errors; keep it.** GDScript has
-  no exceptions, so without `tests/framework/script_error_trap.gd` a test
-  that crashes partway prints PASS.
-- **Headless runs use a 64x64 window stretched to the game's size.** Tests
-  that simulate mouse input must send window pixels
-  (`get_final_transform() * pos`), or clicks land far off-screen.
-- **`set_anchors_preset()` does NOT move a Control.** It sets anchors and
-  leaves the offsets, so a Control built in code comes out zero-sized. Use
-  `set_anchors_and_offsets_preset()` when it should fill its parent.
-- **`PI` is built into Godot shaders.** Declaring it again is a compile
-  error.
-- **Headless Godot can't read back from the GPU** (e.g. MultiMesh
-  transforms come back as zeros). Keep your own copy of anything a test
-  needs to check.
+- **Browsers keep old copies of the game's files** (Project Sam,
+  2026-10-24). `tools/stamp.py` version-stamps every module and the CSS;
+  `tools/playtest.sh` sends `Cache-Control: no-store`. GitHub Pages caches
+  for up to 10 minutes: after a push, a short wait or a refresh.
+- **Browsers pause animation frames in hidden or off-screen pages**, and
+  headless Chrome may never send them. Live tests step the game by hand
+  (`?manual=1`, `page.gameTick`); the test frame sits on-screen at 2%
+  opacity.
+- **iPad Safari only plays sound after a tap.** If sound ever comes in,
+  start it from a tap handler.
+- **A test helper that searches must give up**, or a broken rule loops
+  forever. The runner has a 120 s stopwatch; keep it.
+- **Gate a commit on run_tests.sh's own exit code**, never on `| tail`'s
+  (Project Sam pushed a failing test that way).
+- **Test the crash trap when changing the runner.** Without it, a test that
+  crashes partway can look like a pass.
+- **Don't name functions or variables after built-ins** of the language.
+- From the Godot days, still true for the archive: never put a freed node
+  in a typed variable; don't pipe a windowed Godot run into `head`;
+  `sips --cropOffset 0 0` crops from the centre.
 
 ## Current status
-Updated 2026-09-27 (v0.8.0).
-- **Phases 0 and 1 done.** The pitch is in `docs/pitch.md`: a belt
-  beat-'em-up in a city (like Power Rangers: Rita's Rewind), sword and
-  hammer, gems to collect, keyboard plus Xbox and Switch controllers.
-- **Phase 2, step 1 done:** a three-screen city street; the hero walks
-  left, right, up and down on keyboard, d-pad or stick, and the camera
-  follows. Controller buttons are set up in code (`scripts/controls.gd`),
-  not the editor's Input Map.
-- **Phase 2, step 2 done:** sword (Z/J/Space, bottom and right face
-  buttons) swings in front; hammer (X/K, left and top face buttons) spins
-  all around. Hit shapes and timing live in `scripts/attacks.gd`.
-- **Scheduled after the touch test** (Gareth's OK): Charlie's in-game
-  microphone (tell the sword "whatever you want"), and islands, each with
-  a boss, leading to a final boss. Both are in `docs/pitch.md`.
-- **Phase 2, step 3 done:** waves of three purple monsters walk up beside
-  the hero; two hits and they sink into the ground and leave a gem; walk
-  onto gems to count them (top-left counter). Numbers in
-  `scripts/baddie_brain.gd`, `scripts/waves.gd`, `scripts/gems.gd`; `main.gd`
-  runs the fight. Charlie chose: every baddie gives a gem.
-- **Charlie played v0.4.0 (fight mode): "super fun".**
-- **Phase 2, step 4 done:** 12 hearts (Charlie's number, two rows under
-  the gem counter); baddies wind up and punch; out of hearts the hero
-  lies down, this fight's baddies go, hearts refill, gems kept, and a new
-  wave comes. Hearts and gems live in `scripts/fight_state.gd`
-  (`main.fight`).
-- **Phase 2, step 5 done:** the street mode opens on a pick screen (boy
-  or girl with two pigtails, Charlie's choice). Tests skip it by setting
-  `hero_look` before adding the main scene; `tools/playtest.sh` takes
-  `boy` or `girl` to skip it too.
-- **Phase 2 gate passed** (v0.6.0, 2026-09-27): "It's great."
-- **Phase 3 (helpers) built, v0.8.0.** Charlie's three drawings went
-  Gemini (Gareth, web UI) → Meshy (`meshy-job`, symlinked from Project
-  2126; `MESHY_API_KEY` is in the environment; EVERY job costs credits,
-  so ask before re-rolling) → `tools/helper_sprite.py` (headless Blender)
-  → `assets/helpers/`. Gems are worth 10; helpers join at 200/500/700 and
-  all follow you. Powers: blue wave, yellow sneak-and-bonk, green swoop
-  (2 damage). Each gives a heart at most every 15 s. Numbers live in
-  `scripts/helpers.gd` and `scripts/helper_powers.gd`. Playtest with
-  `tools/playtest.sh helpers`.
-- **Phase 3 gate passed** (v0.8.0, 2026-09-27): "Super fun!"
-- **Next: pick the next phase with Charlie and Gareth** from "After the
-  touch test" in the roadmap. Open question for Gareth: add saving (gems
-  and helpers reset when the game closes)? Photos of drawings go in
-  `drawings/` (raw, not imported by Godot); finished art in `assets/`.
+Updated 2026-10-25 (v0.9.0).
+- **Phases 0 to 3 done in Godot** (v0.1.0 to v0.8.0, all in
+  `archive/godot/`): a belt beat-'em-up in a city (like Power Rangers:
+  Rita's Rewind); walk, sword and spin hammer; waves of purple baddies that
+  punch back and sink into the ground leaving gems (worth 10); 12 hearts;
+  out of hearts restarts the fight and keeps gems; pick a boy or a girl
+  (two pigtails); Charlie's three helpers (blue waves at 200 gems, yellow
+  sneaky at 500, green flying at 700) who also give hearts. Charlie's
+  verdicts: "It's great", "Super fun!".
+- **Phase 4: the web rebuild, in progress.** Step 1 done (v0.9.0): the
+  street and walking, with the on-screen joystick, keyboard and controller,
+  tests in headless Chrome, and GitHub Pages.
+- **Next: Phase 4, step 2**, the sword and hammer. Then baddies and gems,
+  hearts, the pick screen, and the helpers, in that order.
+- Open question for Gareth: saving (gems and helpers reset when the game
+  closes). Charlie's next idea after the rebuild: dragons, islands, the
+  talking sword, or more drawings.

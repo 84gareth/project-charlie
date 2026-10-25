@@ -55,6 +55,22 @@ Shapes for art throughout; real art comes after Charlie says it's fun.
 - ✅ Gate: Charlie plays with his helpers and says whether they're fun.
   Played v0.8.0 (helpers mode) on 2026-09-27: "Super fun!"
 
+## Phase 4: On Charlie's iPad (Gareth, 2026-10-25)
+Rebuilt as a plain web page like Sam's game (Gareth chose a rebuild over a
+Godot export), published on GitHub Pages, played by touch. The Godot game
+is archived in `archive/godot/` (tag `godot-v0.8.0`); every rule and number
+carries over unchanged.
+1. ✅ Web setup: page, tests in headless Chrome, launcher, version stamps,
+   GitHub Pages; the street and walking with an on-screen joystick (plus
+   keyboard and controller) (v0.9.0)
+2. Sword and hammer: two big buttons
+3. Baddies walk in, sink into the ground, drop gems worth 10; the gem
+   counter
+4. Hearts: baddies punch back; out of hearts restarts the fight, gems kept
+5. Pick a boy or a girl at the start
+6. Charlie's three helpers, their powers and hearts
+- Gate: Charlie plays it on his iPad and says whether it's as fun
+
 ## After the touch test (to plan with Charlie and Gareth)
 - Dragons (boss or baddie: Charlie decides), a name, real art
 - The talking sword: an in-game microphone; you tell the sword what to do

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>Tests</title>
+  <style>
+    body { font: 14px/1.4 ui-monospace, Menlo, monospace; margin: 16px; }
+    /* On screen but almost invisible: browsers pause animation in frames
+       placed off-screen. */
+    iframe { position: fixed; left: 0; top: 0; opacity: 0.02; pointer-events: none; z-index: -1; }
+  </style>
+</head>
+<body>
+  <pre id="out">Running...</pre>
+  <script type="module">
+    import { run } from "./framework.js";
+    // Every test file. A new file must be added here to run.
+    const FILES = [
+      "unit/test_version.js",
+      "unit/test_layout.js",
+      "unit/test_walk.js",
+      "unit/test_controls.js",
+      "unit/test_playtest.js",
+      "live/test_page_live.js",
+      "live/test_walk_live.js",
+    ];
+    run(FILES);
+  </script>
+</body>
+</html>
