@@ -3,6 +3,10 @@
 The single ordered list. Work it top to bottom; new items get proposed and
 agreed before they're added (CLAUDE.md rule 11).
 
+Charlie has two games since 2026-10-30: the street game (Phases 0 to 4
+below, in `street/`) and Charlie's Traitors (its own section at the end,
+in `traitors/`), picked from his home page.
+
 ## Phase 0: Project setup ✅ (v0.1.0)
 - ✅ Godot 4.7 project, Compatibility renderer, 1600x900 window
 - ✅ Placeholder main scene showing name and version
@@ -88,3 +92,20 @@ carries over unchanged.
   (Gareth OK'd placing it here, 2026-09-26)
 - Islands, each with a boss; beat every boss to reach the final boss
   (Gareth OK'd placing it here, 2026-09-26)
+
+## Charlie's Traitors (Gareth, 2026-10-30)
+Charlie wants "his own version of the traitors game the same as in Sam's
+but with his own drawings". A separate game in `traitors/`, picked from
+Charlie's home page.
+1. ✅ Home page with two big picture buttons; the street game moves into
+   `street/`; a house button in each game back home
+2. ✅ A copy of Sam's game (Sam's v0.29.0), named "Charlie's Traitors"
+   (Charlie's choice), with its own saves and its own corner of Sam's
+   database (`charlie-rooms/`) (v0.1.0)
+3. ✅ Made-up placeholder pictures for all 22 characters and the shield,
+   dagger, fire pit and flames, instead of Sam's drawings (v0.2.0)
+4. Gareth pastes the `charlie-rooms` rule into the database's rules, so
+   online play works
+5. Charlie's drawings replace the placeholders, one at a time, as he does
+   them
+- Gate: Charlie plays it on his iPad and says whether it's fun

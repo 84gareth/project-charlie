@@ -1,12 +1,24 @@
 # Project Charlie — Working Rules for Claude Code
 
-A game that **Charlie (aged 5) designs** with his dad, Gareth, built as a
-**web page he plays on his iPad**, as a structured AI-assisted learning
-project. It is separate from Gareth's other games, and from his brother
-Sam's game (Project Sam); nothing is shared between them at runtime. See
-`docs/roadmap.md` for where we are.
+Games that **Charlie (aged 5) designs** with his dad, Gareth, built as
+**web pages he plays on his iPad**, as a structured AI-assisted learning
+project. Separate from Gareth's other games and from his brother Sam's
+(Project Sam). See `docs/roadmap.md` for where we are.
 
-The game was first built in Godot (v0.1.0 to v0.8.0). On 2026-10-25
+**Two games and a home page (since 2026-10-30):**
+- `index.html` (root): Charlie's home page. Two big picture buttons, no
+  words: his bugs for the street game, the castle for Charlie's Traitors.
+  Each game has a house button back to it (from the Home Screen there's
+  no browser back button). Tests in `tests/`.
+- `street/`: **the street game**, Charlie's own (the beat-'em-up with his
+  bugs, helpers and trees). Everything below about the canvas, the bugs,
+  walking and so on is this game.
+- `traitors/`: **Charlie's Traitors**, a copy of Project Sam's Traitors
+  game (see "Charlie's Traitors" below).
+Each game is self-contained in its folder (its own `index.html`, `js/`,
+`css/`, `assets/`, `tests/` and `js/version.js`).
+
+The street game was first built in Godot (v0.1.0 to v0.8.0). On 2026-10-25
 Gareth asked for it on Charlie's iPad "like Sam's game", and chose to
 rebuild it as a plain web page rather than export it from Godot. The Godot
 game is kept in `archive/godot/` (git tag `godot-v0.8.0`); it still runs
@@ -53,13 +65,18 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
   the left thumb, sword and hammer buttons on the right. Keyboard (for the
   Mac) and Xbox or Switch controllers (iPads support them) work too. Design
   for a landscape iPad; it must still work held upright.
-- The whole game is drawn on one `<canvas>` in world units (the Godot
-  game's pixels: a 4800 by 900 street); `js/layout.js` `view()` fits it to
-  the screen, always the full height and at least 1200 across.
+- The street game is drawn on one `<canvas>` in world units (the Godot
+  game's pixels: a 4800 by 900 street); `street/js/layout.js` `view()`
+  fits it to the screen, always the full height and at least 1200 across.
 - **Published with GitHub Pages:** https://84gareth.github.io/project-charlie/
-  (the repo is PUBLIC since 2026-10-25, Gareth's call, like Sam's). Every
-  push to `main` updates it within a minute or two. Never put anything
-  private in the repo: no surnames, school, photos of people.
+  (the home page; the games are at `street/` and `traitors/`; the repo is
+  PUBLIC since 2026-10-25, Gareth's call, like Sam's). Every push to `main`
+  updates it within a minute or two. Never put anything private in the
+  repo: no surnames, school, photos of people. Pictures aren't version-
+  stamped: Pages lets browsers keep them up to 10 minutes.
+- **Charlie's and Sam's games share one web address** (84gareth.github.io),
+  so they share the iPad's saved data: keys in Charlie's games must never
+  start `project-sam-`.
 - No Node or npm on this Mac. Python 3 and Google Chrome are here. Godot
   4.7.2 (`~/Downloads/Godot.app`) and Blender are here for the archive and
   the art pipeline.
@@ -77,7 +94,9 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
   → Gemini (Gareth, web UI) → Meshy image-to-3D (`meshy-job`, symlinked
   from Project 2126; `MESHY_API_KEY` is in the environment; EVERY job costs
   credits, so ask before re-rolling) → `tools/helper_sprite.py` (headless
-  Blender) → a PNG in `assets/`. Raw photos go in `drawings/`.
+  Blender) → a PNG in `street/assets/`. Raw photos go in `drawings/`. Since
+  2026-10-25 Gareth wants Charlie's drawings in as he drew them: cut out with
+  `tools/image-fix/cutout.gd` (`crop=`, `erase=`, `sat=`), no Gemini.
 
 ## How we work
 
@@ -108,10 +127,12 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
    results between runs (that's noise; don't tune against it). A question
    about process ("why did that take so long?") wants an answer, not another
    investigation.
-6. **Bump the version on every gameplay change.** Single source of truth:
-   `VERSION` in `js/version.js`. **Then run `python3 tools/stamp.py`**: it
-   stamps the version onto every file index.html loads, so the iPad fetches
-   the new copy (a test fails if you forget, and lists every module).
+6. **Bump the version on every gameplay change**, per game. Single source
+   of truth: `VERSION` in that game's `js/version.js` (`street/` and
+   `traitors/` each have their own). **Then run `python3 tools/stamp.py`**:
+   it stamps each game's version onto every file its index.html loads, so
+   the iPad fetches the new copy (a test fails if you forget). Say which
+   game in the push line: `✅ Pushed to GitHub (street v0.14.2)`.
 7. **When you suggest options, number them** so Charlie can pick by number.
    Two or three options at most, a few words each.
 8. **No emoji in game UI.** Pictures drawn on the canvas, never words a
@@ -136,15 +157,18 @@ Project 2126 (`~/Projects/project-2126/project-2126`) and Project Two
     - **EVERY update ends with the link to play** (Gareth, 2026-09-26;
       widened 2026-09-27 to every update): after the five headings, the
       iPad link (https://84gareth.github.io/project-charlie/) and a `bash`
-      code block that runs the launcher with the mode that shows the newest
-      thing (`street` when nothing changed), so the Run button starts it:
+      code block that runs the launcher with the page that shows the newest
+      thing (no argument, the home page, when nothing changed), so the Run
+      button starts it:
       ```bash
       cd "/Users/gareth/Projects/Project Charlie" && tools/playtest.sh fight
       ```
-      Modes: `street` (normal game), `practice` (no baddies), `fight` (a
-      wave straight away), `helpers` (700 gems, all three helpers), `tests`
-      (the test page); add `boy` or `girl` for that hero. Add a mode to the
-      launcher (and `js/playtest.js`) when a new screen or mode needs one.
+      Pages: `home` (default), `traitors` (Charlie's Traitors), and for the
+      street game `street`, `practice` (no baddies), `fight` (a wave
+      straight away), `helpers` (700 gems, all three helpers), plus `boy`
+      or `girl`; test pages `tests`, `traitors-tests`, `home-tests`. Add a
+      mode to the launcher (and `street/js/playtest.js`) when a new screen
+      needs one. The launcher uses port 8020 (Sam's uses 8000).
 11. **Work the roadmap in order; don't silently insert.** `docs/roadmap.md` is
     the single ordered list. When something new comes up, propose where it
     goes and get an OK before adding it.
@@ -194,19 +218,51 @@ leftover `.godot/` cache at the root stays; it's gitignored) and any
 edit files with the Edit tool.
 
 ## Web conventions for this project
-- `index.html` at the root (GitHub Pages serves it). `js/` for code (ES
-  modules), `css/` for styles, `assets/` for pictures.
+- The home page `index.html` at the root (GitHub Pages serves it); each
+  game in its own folder with `index.html`, `js/` (ES modules), `css/`,
+  `assets/` and `tests/`. Shared tools stay in `tools/`.
 - Game rules live in pure modules (no `document`, no timers) so unit tests
-  can import them: `layout.js`, `walk.js`, `controls.js`, `playtest.js`,
-  and more as the rebuild goes on. The page code (`main.js`, `input.js`,
+  can import them. Street game: `layout.js`, `walk.js`, `controls.js`,
+  `attacks.js`, `baddie_brain.js`, `baddies.js`, `waves.js`, `gems.js`,
+  `fight.js`, `playtest.js`; its page code (`main.js`, `input.js`,
   `art.js`, `hud.js`) only draws and listens.
-- Every test file is listed in `tests/index.html`; the runner fails a file
-  that doesn't load or registers no tests.
+- Every test file is listed in its game's `tests/index.html` (or the home
+  page's `tests/index.html`); the runner fails a file that doesn't load
+  or registers no tests. `./run_tests.sh` runs all three pages;
+  `--game=street|traitors|home` runs one.
 - Touch: Pointer Events (`pointerdown`/`pointermove`/`pointerup`), not
   mouse events. Buttons at least 60 px. `touch-action: none` on the game so
   Safari doesn't scroll or zoom.
 - Carry numbers over from the Godot game unchanged unless Charlie or Gareth
   asks; its pure scripts in `archive/godot/scripts/` are the reference.
+
+## Charlie's Traitors (`traitors/`)
+Charlie wanted "his own version of the traitors game the same as in Sam's
+but with his own drawings" (2026-10-30). Copied from Project Sam at
+d67901c (Sam's v0.29.0); Charlie's copy restarted at v0.1.0. From then on
+the two games are separate: Sam's later changes don't come over by
+themselves, and nothing Charlie changes reaches Sam's.
+- **Name:** "Charlie's Traitors" (Charlie's choice).
+- **Saves:** keys start `charlie-traitors-`, never `project-sam-`.
+- **Online play shares Sam's Firebase database, kept apart** (Gareth's
+  choice): Charlie's rooms live under `charlie-rooms/`
+  (`traitors/js/firebase-net.js`); Sam's live under `rooms/`. The database
+  needs a `charlie-rooms` rule beside Sam's `rooms` rule (given to Gareth
+  2026-10-30); until it's pasted, Charlie's multiplayer is refused.
+  Single player never touches the database.
+- **Pictures:** every character, the shield, dagger, fire pit and flames
+  start as made-up placeholders (`tools/placeholders/`), swapped for
+  Charlie's drawings one at a time: how in `traitors/docs/characters.md`.
+  The station, castle and rooms are made pictures from Sam's game and stay.
+- **It's Sam's code, with Sam's lessons.** Before changing anything in
+  `traitors/`, read Project Sam's CLAUDE.md "Project landmines" (speech and
+  sound only after a tap, `fit.js` and `cqw` units for phones, the puppet
+  castle's paused frames and `castleTick`, the local net for tests) and
+  `traitors/docs/`. Its tests are Sam's 226, run with
+  `./run_tests.sh --game=traitors`.
+- Sam's game is for 8 to 11 year olds and has words to read; voices read
+  most of it aloud. If Charlie gets stuck on reading, that's a design
+  question for Charlie and Gareth, not something to change unasked.
 
 ## Don't add what wasn't asked for
 In Project Two, sound effects went in unasked and stayed through five
@@ -248,7 +304,11 @@ so, kindly.
   `sips --cropOffset 0 0` crops from the centre.
 
 ## Current status
-Updated 2026-10-25 (v0.9.0).
+Updated 2026-10-30 (street v0.14.2, Charlie's Traitors v0.2.0).
+- **Two games and a home page (2026-10-30):** the street game moved into
+  `street/`; Charlie's Traitors (a copy of Sam's game, placeholder
+  pictures) is in `traitors/`; the home page picks between them. Waiting on
+  Gareth: the `charlie-rooms` database rule for online play.
 - **Phases 0 to 3 done in Godot** (v0.1.0 to v0.8.0, all in
   `archive/godot/`): a belt beat-'em-up in a city (like Power Rangers:
   Rita's Rewind); walk, sword and spin hammer; waves of purple baddies that
