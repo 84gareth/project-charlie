@@ -1,0 +1,1192 @@
+// A day at the castle on the real page: chat, vote with chalkboards, reveal.
+import { test, assert, openPage, until } from "../framework.js";
+import { newGame, TRAITOR, FAITHFUL } from "../../js/game.js";
+import {
+  arriveAtCastle, roundTable, night, winner, stillIn, recruit, tableTalk, talkOptions, playerSays,
+  nightKind, isTraitor,
+} from "../../js/castle.js";
+import {
+  todaysMission, bellTune, pieRound, cookingDiner, shieldTruck, TRUCKS, HATES, flopResult, MISSIONS,
+  whereRounds, jumbleWords, secretCode, makeMaze, canStep, MAZE_W, MAZE_H, galleryRounds,
+  treasureSpot, truckFoods, SLING, SLING_POWER, FLIGHT, keyHides,
+} from "../../js/missions.js";
+
+// What flopMission does, as rules (for rehearsing a game to find a seed).
+const rehearseFlop = (g) => flopResult(g, stillIn(g));
+
+// Sam's words at the Round Table sway the others, so rehearsals must say them too.
+const sayFirst = (g) => playerSays(g, talkOptions(g, tableTalk(g))[0]);
+const sayQuiet = (g) => { const o = talkOptions(g, tableTalk(g)); playerSays(g, o[o.length - 1]); };
+
+function seedFor(id, side) {
+  for (let seed = 1; seed <= 10000; seed++) if (newGame(id, seed).playerSide === side) return seed;
+  throw new Error(`no seed in 10000 makes ${id} a ${side}`);
+}
+
+// Station -> Chef Pepper -> secret -> castle. ?fast=1 skips the pauses.
+async function toCastle(seed) {
+  const page = await openPage(`../index.html?seed=${seed}&fast=1`);
+  const doc = page.document;
+  await until(() => doc.querySelectorAll(".card").length === 22, "cards built");
+  doc.getElementById("start").click();
+  doc.getElementById("mode-single").click();
+  doc.querySelectorAll("#cards .card")[4].click();
+  doc.getElementById("choose").click();
+  doc.getElementById("to-castle").click();
+  await until(() => !doc.getElementById("screen-castle").hidden, "the train ride arrives at the castle (no mission on day 1)", 8000);
+  return { page, doc };
+}
+
+// Give up today's mission at once (the test-only give-up: as badly as
+// possible, the same as flopResult), then go to the castle.
+async function flopMission(page, doc) {
+  await until(() => visible(doc, "screen-mission"), "the day's mission");
+  doc.getElementById("mission-go").click();
+  page.missionGiveUp();
+  await until(() => visible(doc, "mission-result"), "the mission is over");
+  doc.getElementById("mission-done").click();
+  await until(() => !doc.getElementById("screen-castle").hidden, "on to the castle");
+}
+const visible = (doc, id) => !doc.getElementById(id).hidden;
+// Decisions take a moment now (engine.js), even on your own: click, then
+// wait for the next screen.
+async function clickTable(doc) {
+  doc.getElementById("to-table").click();
+  await until(() => visible(doc, "screen-walk") || visible(doc, "screen-talk"), "off to the Round Table");
+}
+async function clickNext(doc) {
+  doc.getElementById("next-day").click();
+  await until(() => !visible(doc, "screen-banished"), "on from the reveal", 8000);
+}
+// Redraw the castle now (after a test moves people about).
+const redraw = (page) => page.castleTick();
+// Someone in Sam's room who isn't busy chatting (tapping a chatting pair
+// opens "join their chat" instead). Held still so they stay put.
+function someoneFree(page, doc) {
+  const room = page.world.me.room;
+  const id = Object.entries(page.world.people).find(([, p]) => p.room === room && p.mode !== "chat")?.[0]
+    ?? Object.keys(page.world.people).find((x) => x !== "pepper");
+  Object.assign(page.world.people[id], { room, mode: "chat", with: page.game.playerId, timer: 99, x: 0.3, y: 0.85 });
+  redraw(page);
+  return doc.querySelector(`.puppet[data-id="${id}"]`);
+}
+
+test("the train takes you to the castle: everyone else is walking round its rooms", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  assert.ok(visible(doc, "screen-castle"));
+  assert.eq(doc.getElementById("castle-day").textContent, "Day 1 of 12");
+  assert.eq(Object.keys(page.world.people).length, 21, "21 others in the castle");
+  assert.eq(doc.getElementById("room-name").textContent, "Great hall", "Sam starts in the great hall");
+  await until(() => doc.querySelectorAll(".puppet:not(.me)").length > 0, "puppets in the room");
+  const here = Object.entries(page.world.people).filter(([, p]) => p.room === "hall").length;
+  assert.eq(doc.querySelectorAll(".puppet:not(.me)").length, here, "everyone in the hall is drawn");
+  assert.eq(doc.querySelectorAll(".puppet.me").length, 1, "and Sam");
+  assert.notOk(visible(doc, "fellows"), "a Faithful doesn't see any Traitors");
+});
+
+// Walking itself is tested in unit/test_puppets.js. In the full headless
+// run the test browser stops sending animation frames partway, so this only
+// checks that the door button is wired up and shows the right room.
+test("the door shows the next room and starts Sam walking through it", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  assert.ok(doc.getElementById("door-right").textContent.startsWith("Library"), "the right door goes to the library");
+  assert.ok(doc.getElementById("door-left").textContent.includes("Kitchen"), "the left door goes to the kitchen");
+  doc.getElementById("door-right").click();
+  assert.eq(page.world.me.door, "right", "heading for the door");
+  assert.ok(page.world.me.walking, "walking");
+});
+
+test("chat: tap someone, ask all six questions, they answer", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  someoneFree(page, doc).click();
+  assert.ok(visible(doc, "screen-chat"));
+  const buttons = doc.querySelectorAll("#questions .question");
+  assert.eq(buttons.length, 6);
+  for (const b of buttons) {
+    b.click();
+    assert.ok(visible(doc, "bubble"), b.textContent);
+    assert.gt(doc.getElementById("bubble-text").textContent.length, 0, b.textContent);
+  }
+  buttons[0].click();
+  assert.eq(doc.querySelectorAll("#bubble-list li").length, 5, "their list shows 5 names");
+  doc.getElementById("chat-back").click();
+  assert.ok(visible(doc, "screen-castle"), "back to everyone");
+});
+
+test("a Traitor sees the other two Traitors", async () => {
+  const seed = seedFor("pepper", TRAITOR);
+  const { page, doc } = await toCastle(seed);
+  assert.ok(visible(doc, "fellows"));
+  const others = page.game.players.filter((p) => p.side === TRAITOR && p.id !== "pepper");
+  assert.eq(others.length, 2);
+  const { CHARACTERS } = await import("../../js/characters.js");
+  for (const o of others) {
+    const name = CHARACTERS.find((c) => c.id === o.id).name;
+    assert.ok(doc.getElementById("fellows").textContent.includes(name), name);
+  }
+});
+
+// A seed where, after Sam (Chef Pepper) votes for the first person on the
+// Round Table (Captain Puddle), the night does what `want` says.
+function nightSeed(side, want) {
+  for (let seed = 1; seed <= 5000; seed++) {
+    if (newGame("pepper", seed).playerSide !== side) continue;
+    const g = arriveAtCastle(newGame("pepper", seed));
+    sayFirst(g);
+    roundTable(g, "puddle");
+    if (winner(g) || !stillIn(g).includes("pepper")) continue;
+    if (side === TRAITOR || want(recruit(g))) return seed;
+  }
+  throw new Error("no seed found");
+}
+
+async function talkThenTable(doc) {
+  if (doc.getElementById("screen-talk").hidden) await clickTable(doc);
+  await until(() => !doc.getElementById("talk-options").hidden, "the Round Table talk", 8000);
+  doc.querySelector("#talk-options .question").click();
+  await until(() => !doc.getElementById("to-vote").hidden, "Sam has spoken");
+  doc.getElementById("to-vote").click();
+}
+
+async function voteAndReveal(doc) {
+  await talkThenTable(doc);
+  doc.querySelector("#table-cards .card").click();
+  doc.getElementById("cast-vote").click();
+  await until(() => !doc.getElementById("to-reveal").hidden, "all the chalkboards are up");
+  doc.getElementById("to-reveal").click();
+  await until(() => !doc.getElementById("after-reveal").hidden || !doc.getElementById("game-over").hidden, "the reveal", 8000);
+}
+
+test("Round Table: vote, everyone shows a chalkboard, drum roll, reveal, next day", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  await talkThenTable(doc);
+  assert.ok(visible(doc, "screen-table"));
+  assert.ok(doc.getElementById("cast-vote").disabled, "can't vote before picking");
+  doc.querySelector("#table-cards .card").click();
+  doc.getElementById("cast-vote").click();
+  await until(() => visible(doc, "to-reveal"), "all the chalkboards are up");
+  assert.eq(doc.querySelectorAll("#boards .chalkboard").length, 22, "22 chalkboards");
+  assert.eq(doc.getElementById("boards").dataset.pauses, "3", "stopped 3 times to count the votes");
+  assert.ok([...doc.querySelectorAll(".board-voter")].some((b) => b.textContent === "Chef Pepper (you)"), "yours is there");
+  doc.getElementById("to-reveal").click();
+  await until(() => doc.getElementById("reveal").textContent.includes("!"), "the reveal", 8000);
+  const out = page.game.history[0];
+  const word = out.side === TRAITOR ? "TRAITOR!" : "FAITHFUL!";
+  assert.eq(doc.getElementById("reveal").textContent, `I am a... ${word}`);
+  assert.ok(visible(doc, "after-reveal"), "Night falls button");
+  await clickNext(doc);
+  await until(() => visible(doc, "to-breakfast") || visible(doc, "night-over"), "the night passes");
+  doc.getElementById("to-breakfast").click();
+  await until(() => visible(doc, "start-day") || visible(doc, "breakfast-over"), "breakfast", 8000);
+  assert.ok(page.game.history[0].recruited, "night 1: the Traitors recruited someone");
+  assert.notOk(page.game.history[0].murdered, "and nobody was murdered");
+  assert.ok(doc.getElementById("missing").textContent.includes("Nobody was murdered"));
+  assert.eq(doc.querySelectorAll("#arrivals .arrival-person").length, 21, "all 21 came to breakfast");
+  assert.ok(doc.getElementById("crossout").hidden, "the crossed-out panel has made way for everyone");
+  assert.eq(doc.querySelectorAll("#gone .arrival-person").length, 22, "everyone on the list");
+  const gone = [...doc.querySelectorAll("#gone .gone-person")].map((g) => g.dataset.id).sort();
+  assert.eq(gone, [out.banished], "only the banished one is crossed out");
+  doc.getElementById("start-day").click();
+  await flopMission(page, doc);
+  assert.eq(doc.getElementById("castle-day").textContent, "Day 2 of 12");
+  await until(() => doc.querySelector(".puppet.me"), "back in the castle");
+  assert.notOk(doc.querySelector(`.puppet[data-id="${out.banished}"]`), "the banished one has gone from the castle");
+});
+
+test("night 1: if the Traitors recruit Sam, a letter makes him a Traitor", async () => {
+  const { page, doc } = await toCastle(nightSeed(FAITHFUL, (v) => v === "pepper"));
+  await voteAndReveal(doc);
+  await clickNext(doc);
+  await until(() => visible(doc, "envelope"), "a sealed letter", 8000);
+  assert.notOk(visible(doc, "letter"), "sealed until you tap it");
+  assert.notOk(visible(doc, "to-breakfast"), "open it first");
+  doc.getElementById("envelope").click();
+  await until(() => visible(doc, "letter"), "the letter unfolds", 8000);
+  assert.ok(doc.getElementById("letter").textContent.includes("By order of the Traitors"));
+  assert.ok(doc.getElementById("letter").textContent.includes("you are now a Traitor"));
+  assert.eq(page.game.playerSide, TRAITOR);
+  assert.ok(visible(doc, "to-breakfast"), "then breakfast, as a Traitor");
+});
+
+test("a Faithful who is murdered (night 2) gets the letter", async () => {
+  // A seed where the night-1 recruit isn't Sam and night 2 is a murder.
+  // The computer Traitors hardly ever pick Sam, so everyone else gets a
+  // shield that night (below).
+  let seed = 0;
+  for (let s = 1; s <= 5000 && !seed; s++) {
+    if (newGame("pepper", s).playerSide !== FAITHFUL) continue;
+    const g = arriveAtCastle(newGame("pepper", s));
+    sayFirst(g);
+    roundTable(g, "puddle");
+    if (winner(g) || !stillIn(g).includes("pepper") || recruit(g) === "pepper") continue;
+    rehearseFlop(g);
+    sayQuiet(g);
+    roundTable(g, stillIn(g).find((id) => id !== "pepper"));
+    if (winner(g) || !stillIn(g).includes("pepper")) continue;
+    if (nightKind(g) === "murder") seed = s;
+  }
+  assert.gt(seed, 0, "found a game");
+  const { page, doc } = await toCastle(seed);
+  await voteAndReveal(doc);
+  await clickNext(doc);
+  await until(() => visible(doc, "to-breakfast"), "no letter on night 1", 8000);
+  doc.getElementById("to-breakfast").click();
+  await until(() => visible(doc, "start-day"), "breakfast", 8000);
+  doc.getElementById("start-day").click();
+  await flopMission(page, doc);
+  // Day 2: the Round Table picks the first person still on the list.
+  await clickTable(doc);
+  await until(() => visible(doc, "talk-options"), "the talk", 8000);
+  doc.querySelector("#talk-options .question:last-child").click();
+  doc.getElementById("to-vote").click();
+  [...doc.querySelectorAll("#table-cards .card")].find((c) => c.dataset.id !== "pepper").click();
+  doc.getElementById("cast-vote").click();
+  await until(() => visible(doc, "to-reveal"), "the chalkboards", 20000);
+  doc.getElementById("to-reveal").click();
+  await until(() => visible(doc, "after-reveal") || visible(doc, "game-over"), "the reveal", 8000);
+  if (visible(doc, "game-over")) return;   // the game ended at the table instead
+  page.game.shields = stillIn(page.game).filter((id) => id !== "pepper" && !isTraitor(page.game, id));
+  await clickNext(doc);
+  await until(() => visible(doc, "envelope"), "a sealed letter", 8000);
+  doc.getElementById("envelope").click();
+  await until(() => visible(doc, "letter"), "the letter unfolds", 8000);
+  assert.ok(doc.getElementById("letter").textContent.includes("you have been murdered"));
+  assert.ok(visible(doc, "night-over"), "Play again");
+});
+
+test("a Traitor goes to the secret meeting and picks who to recruit (night 1)", async () => {
+  const { page, doc } = await toCastle(nightSeed(TRAITOR));
+  await voteAndReveal(doc);
+  await clickNext(doc);
+  assert.ok(visible(doc, "screen-traitors"), "the secret meeting");
+  assert.gt(doc.querySelectorAll("#traitor-ideas .idea").length, 0, "the others give ideas");
+  assert.ok(doc.getElementById("meeting-hint").textContent.includes("recruit"), "it's the recruiting night");
+  assert.ok(doc.getElementById("murder").disabled, "pick first");
+  const pick = doc.querySelectorAll("#victim-cards .card")[2];
+  pick.click();
+  doc.getElementById("murder").click();
+  await until(() => visible(doc, "start-day") || visible(doc, "breakfast-over"), "breakfast", 8000);
+  assert.eq(page.game.history[0].recruited, pick.dataset.id, "Sam's pick joined the Traitors");
+  assert.eq(page.game.players.find((p) => p.id === pick.dataset.id).side, TRAITOR);
+  for (const id of [...doc.querySelectorAll("#victim-cards .card")].map((c) => c.dataset.id)) {
+    if (id === pick.dataset.id) continue;
+    assert.eq(page.game.players.find((p) => p.id === id).side, FAITHFUL, "only Faithfuls to pick from");
+  }
+});
+
+test("the voices button switches voices off and on", async () => {
+  const { page, doc } = await toCastle(1);
+  const btn = doc.getElementById("voices");
+  const before = btn.textContent;
+  btn.click();
+  assert.ne(btn.textContent, before);
+  btn.click();
+  assert.eq(btn.textContent, before);
+});
+
+// Listen in on what the page says out loud (instead of really speaking).
+function listen(page) {
+  const said = [];
+  page.speechSynthesis.cancel = () => {};
+  page.speechSynthesis.speak = (u) => said.push({ text: u.text, pitch: u.pitch, rate: u.rate });
+  page.localStorage.setItem("charlie-traitors-voices", "on");
+  return said;
+}
+
+test("every chat answer is spoken, in that character's own voice every time", async () => {
+  const { voiceFor } = await import("../../js/voice.js");
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const said = listen(page);
+  const cardEl = someoneFree(page, doc);
+  const id = cardEl.dataset.id;
+  cardEl.click();
+  for (const b of doc.querySelectorAll("#questions .question")) b.click();
+  const lines = said.filter((s) => !s.text.startsWith("Day "));
+  assert.eq(lines.length, 6, "six answers, six spoken lines");
+  for (const l of lines) {
+    assert.near(l.pitch, voiceFor(id).pitch, 1e-6, "same voice every line");
+    assert.near(l.rate, voiceFor(id).rate, 1e-6);
+  }
+  assert.eq(lines[5].text, doc.getElementById("bubble-text").textContent, "it says what the bubble says");
+});
+
+test("at the secret meeting, each Traitor says their idea out loud", async () => {
+  const { voiceFor } = await import("../../js/voice.js");
+  const { page, doc } = await toCastle(nightSeed(TRAITOR));
+  await voteAndReveal(doc);
+  const said = listen(page);
+  await clickNext(doc);
+  const ideas = [...doc.querySelectorAll("#traitor-ideas .idea")];
+  const spoken = said.filter((s) => s.text.startsWith("Let's"));
+  assert.eq(spoken.length, ideas.length, "one spoken line per idea");
+  const fellows = page.game.players.filter((p) => p.side === TRAITOR && p.id !== "pepper" && p.inGame);
+  spoken.forEach((s, i) => assert.near(s.pitch, voiceFor(fellows[i].id).pitch, 1e-6, "in their own voice"));
+});
+
+test("Round Table talk: people accuse and defend, then Sam joins in", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  await clickTable(doc);
+  await until(() => visible(doc, "screen-talk"), "after the walk, talk comes before the vote", 8000);
+  await until(() => visible(doc, "talk-options"), "Sam's turn to speak", 8000);
+  assert.gt(doc.querySelectorAll("#talk-lines .talk-line").length, 1, "people have spoken");
+  const opts = doc.querySelectorAll("#talk-options .question");
+  assert.ok(opts.length >= 3, "options to join in");
+  opts[0].click();
+  await until(() => visible(doc, "to-vote"), "then the vote");
+  assert.ok([...doc.querySelectorAll("#talk-lines .talk-line b")].some((b) => b.textContent === "Chef Pepper (you): "), "Sam's line appears");
+  doc.getElementById("to-vote").click();
+  assert.ok(visible(doc, "screen-table"));
+});
+
+test("join two chatting Traitors as a Faithful: they send you away", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const [a, b] = page.game.players.filter((p) => p.side === TRAITOR).map((p) => p.id);
+  for (const [id, other] of [[a, b], [b, a]]) {
+    Object.assign(page.world.people[id], { room: "hall", mode: "chat", timer: 99, with: other, x: id === a ? 0.4 : 0.5, y: 0.85 });
+  }
+  redraw(page);
+  await until(() => doc.querySelector(`.puppet[data-id="${a}"]`), "they're in the hall");
+  doc.querySelector(`.puppet[data-id="${a}"]`).click();
+  assert.ok(visible(doc, "screen-join"), "Sam joins their chat");
+  assert.eq(doc.querySelectorAll("#join-actions .join-chat").length, 0, "not welcome: nobody to chat to");
+  assert.gt(doc.getElementById("join-text").textContent.length, 0);
+  assert.eq(doc.querySelectorAll("#join-pictures img.cutout, #join-pictures .badge").length, 2, "both of them, cut out");
+});
+
+test("talking to someone shows their cut-out puppet", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  // Held still, already turned to Sam, so nobody else can start a chat with
+  // him first (that would rightly open "join their chat" instead).
+  Object.assign(page.world.people.puddle, { room: "hall", mode: "chat", with: "pepper", timer: 99, x: 0.3, y: 0.85 });
+  redraw(page);
+  await until(() => doc.querySelector('.puppet[data-id="puddle"]'), "Captain Puddle in the hall");
+  doc.querySelector('.puppet[data-id="puddle"]').click();
+  assert.ok(visible(doc, "screen-chat"));
+  assert.ok(doc.querySelector("#chat-picture img.cutout"), "the cut-out, not the framed portrait");
+});
+
+test("a welcoming group: Sam can pick anyone in it to talk to", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const { joinChat } = await import("../../js/castle.js");
+  const faithful = page.game.players.filter((p) => p.side === FAITHFUL && p.id !== "pepper").map((p) => p.id);
+  let pair = null;
+  for (let i = 0; i < faithful.length - 1 && !pair; i++) {
+    if (joinChat(page.game, faithful[i], faithful[i + 1]).welcome) pair = [faithful[i], faithful[i + 1]];
+  }
+  const [a, b] = pair;
+  for (const [id, other, x] of [[a, b, 0.4], [b, a, 0.5]]) {
+    Object.assign(page.world.people[id], { room: "hall", mode: "chat", timer: 99, with: other, x, y: 0.85 });
+  }
+  redraw(page);
+  await until(() => doc.querySelector(`.name-tag[data-id="${a}"]`), "their name tags");
+  doc.querySelector(`.name-tag[data-id="${b}"]`).click();
+  assert.ok(visible(doc, "screen-join"));
+  const buttons = [...doc.querySelectorAll("#join-actions .join-chat")].map((x) => x.dataset.id).sort();
+  assert.eq(buttons, [a, b].sort(), "a button for each of them");
+  doc.querySelector(`#join-actions .join-chat[data-id="${b}"]`).click();
+  assert.ok(visible(doc, "screen-chat"));
+  assert.eq(doc.getElementById("chat-name").textContent, (await import("../../js/characters.js")).CHARACTERS.find((c) => c.id === b).name);
+});
+
+test("name tags never overlap, even in a crowd", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const ids = Object.keys(page.world.people).slice(0, 6);
+  ids.forEach((id, i) => Object.assign(page.world.people[id], { room: "hall", mode: "chat", with: "pepper", timer: 99, x: 0.45 + i * 0.01, y: 0.85 }));
+  redraw(page);
+  await until(() => ids.every((id) => doc.querySelector(`.name-tag[data-id="${id}"]`)), "all six name tags");
+  await new Promise((r) => setTimeout(r, 200));
+  const rects = ids.map((id) => doc.querySelector(`.name-tag[data-id="${id}"]`).getBoundingClientRect());
+  for (let i = 0; i < rects.length; i++) for (let j = i + 1; j < rects.length; j++) {
+    const a = rects[i], b = rects[j];
+    const overlap = a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+    assert.notOk(overlap, `${ids[i]} and ${ids[j]} overlap`);
+  }
+});
+
+test("All aboard! plays the train ride before the castle", async () => {
+  const page = await openPage(`../index.html?seed=1&fast=1`);
+  const doc = page.document;
+  await until(() => doc.querySelectorAll(".card").length === 22, "cards built");
+  doc.getElementById("start").click();
+  doc.getElementById("mode-single").click();
+  doc.querySelectorAll("#cards .card")[4].click();
+  doc.getElementById("choose").click();
+  doc.getElementById("to-castle").click();
+  assert.ok(visible(doc, "screen-train"), "the train ride shows first");
+  await until(() => visible(doc, "screen-castle"), "then the castle: no mission on day 1", 8000);
+});
+
+// Straight to one mission, through the debug menu.
+async function toMission(id, seed = 3, width = 1024, height = 768) {
+  const page = await openPage(`../index.html?debug&seed=${seed}&fast=1`, width, height);
+  const doc = page.document;
+  await until(() => visible(doc, "debug"), "the Test a mission button");
+  doc.getElementById("debug").click();
+  doc.querySelector(`#debug-missions [data-mission="${id}"]`).click();
+  assert.ok(visible(doc, "screen-mission"));
+  return { page, doc };
+}
+
+test("Castle Bells: ring every tune back right and you win the shield", async () => {
+  const { page, doc } = await toMission("bells");
+  assert.ok(doc.getElementById("mission-name").textContent.includes("Castle Bells"));
+  doc.getElementById("mission-go").click();
+  const tune = bellTune(page.game);
+  for (const length of [3, 4, 5, 6, 7]) {
+    await until(() => doc.getElementById("bells").dataset.round === String(length)
+      && doc.getElementById("mission-status").textContent === "Your turn!", `round of ${length}`, 8000);
+    for (let k = 0; k < length; k++) doc.querySelector(`.bell[data-bell="${tune[k]}"]`).click();
+  }
+  await until(() => visible(doc, "mission-result"), "the result", 8000);
+  assert.ok(doc.getElementById("mission-score").textContent.includes("perfectly"));
+  assert.ok(doc.getElementById("mission-shield").textContent.includes("You win a shield"));
+  assert.gt(page.game.pot, 0);
+  assert.ok(doc.getElementById("mission-pot").textContent.includes("£"));
+  doc.getElementById("mission-done").click();
+  assert.ok(visible(doc, "screen-debug"), "back to the test menu");
+});
+
+test("Chilli Pie Shuffle: follow the chilli pie three times", async () => {
+  const { page, doc } = await toMission("pies");
+  assert.ok(doc.getElementById("mission-name").textContent.includes("Chilli Pie"));
+  doc.getElementById("mission-go").click();
+  for (let round = 0; round < 3; round++) {
+    await until(() => doc.getElementById("pies").dataset.round === String(round)
+      && doc.getElementById("mission-status").textContent === "Which one is the chilli pie?", `round ${round + 1}`, 8000);
+    const { answer } = pieRound(page.game, round);
+    const pies = [...doc.querySelectorAll(".pie")].sort((a, b) => parseFloat(a.style.left) - parseFloat(b.style.left));
+    pies[answer].click();
+  }
+  await until(() => visible(doc, "mission-result"), "the result", 8000);
+  assert.ok(doc.getElementById("mission-score").textContent.includes("3 times out of 3"));
+  assert.ok(doc.getElementById("mission-shield").textContent.includes("You win a shield"));
+});
+
+test("each room has its own sound, and the Round Table has a crackling fire", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  page.castleTick();
+  await until(() => doc.body.dataset.roomSound === "hall", "the great hall's sound");
+  page.world.me.room = "garden";
+  page.castleTick();
+  await until(() => doc.body.dataset.roomSound === "garden", "the garden's sound");
+  await clickTable(doc);
+  await until(() => doc.body.dataset.roomSound === "table", "the fire at the Round Table");
+  assert.eq(doc.body.dataset.music, "table", "and the tense music");
+  await new Promise((r) => setTimeout(r, 300));
+  assert.eq(doc.body.dataset.roomSound, "table", "and it stays on");
+  await voteAndReveal(doc);
+  assert.eq(doc.body.dataset.roomSound, "table", "through the vote and the reveal");
+  if (!visible(doc, "after-reveal")) return;   // the game ended at the table
+  await clickNext(doc);
+  await until(() => doc.body.dataset.roomSound === "", "quiet at night");
+  assert.eq(doc.body.dataset.music, "", "the music stops at night");
+});
+
+test("debug menu (?debug): play any mission on its own, then back to the list", async () => {
+  const page = await openPage(`../index.html?debug&seed=3&fast=1`);
+  const doc = page.document;
+  await until(() => visible(doc, "debug"), "the Test a mission button");
+  doc.getElementById("debug").click();
+  const ids = [...doc.querySelectorAll("#debug-missions .question")].map((b) => b.dataset.mission);
+  assert.eq(ids.length, 13, "all 13 missions");
+  for (const id of ids) {
+    doc.querySelector(`#debug-missions [data-mission="${id}"]`).click();
+    assert.ok(visible(doc, "screen-mission"));
+    const name = doc.getElementById("mission-name").textContent;
+    assert.ok(name.includes(MISSIONS.find((m) => m.id === id).name), name);
+    // Give up at once, then back to the list.
+    doc.getElementById("mission-go").click();
+    page.missionGiveUp();
+    await until(() => visible(doc, "mission-result"), "the result");
+    assert.eq(doc.getElementById("mission-done").textContent, "Back to the missions");
+    doc.getElementById("mission-done").click();
+    assert.ok(visible(doc, "screen-debug"), "back to the list");
+  }
+});
+
+test("no debug button without ?debug", async () => {
+  const page = await openPage(`../index.html?fast=1`);
+  await until(() => page.document.querySelectorAll(".card").length === 22, "cards built");
+  assert.notOk(visible(page.document, "debug"));
+});
+
+test("a quiet night: the Traitors only plot, and everyone comes to breakfast", async () => {
+  for (const side of [FAITHFUL, TRAITOR]) {
+    // Day 1 must leave 3 Traitors, so tonight isn't a recruiting night.
+    let seed = 0;
+    for (let s = 1; s <= 5000 && !seed; s++) {
+      if (newGame("pepper", s).playerSide !== side) continue;
+      const g = arriveAtCastle(newGame("pepper", s));
+      sayFirst(g);
+      roundTable(g, "puddle");
+      if (!winner(g) && stillIn(g).includes("pepper") && stillIn(g).filter((id) => isTraitor(g, id)).length === 3) seed = s;
+    }
+    assert.gt(seed, 0, "found a game");
+    const { page, doc } = await toCastle(seed);
+    await voteAndReveal(doc);
+    // Pretend it's night 5 with only 12 left: another murder would leave too
+    // few for day 12, so tonight is a no-murder night.
+    page.game.history.unshift({ quiet: true }, { quiet: true }, { quiet: true }, { quiet: true });
+    const g = page.game;
+    for (const p of g.players.filter((x) => x.inGame && x.side !== TRAITOR && x.id !== "pepper")) {
+      if (stillIn(g).length <= 12) break;
+      p.inGame = false;
+    }
+    assert.eq(nightKind(g), "quiet", "a no-murder night");
+    await clickNext(doc);
+    await until(() => visible(doc, "to-breakfast"), "the quiet night", 8000);
+    assert.notOk(visible(doc, "letter"), "no letter");
+    assert.ok(visible(doc, "screen-night"), `${side}: the night screen, not the Traitors' meeting`);
+    const before = stillIn(page.game).length;
+    doc.getElementById("to-breakfast").click();
+    await until(() => visible(doc, "start-day"), "breakfast", 8000);
+    assert.ok(doc.getElementById("missing").textContent.includes("Nobody was murdered"));
+    assert.eq(stillIn(page.game).length, before, "nobody murdered");
+  }
+});
+
+test("everyone walks to the Round Table in slow motion, to drums", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  await clickTable(doc);
+  assert.gt(doc.querySelectorAll("#walk-line [data-id]").length, 0, "the walk comes first");
+  const walkers = [...doc.querySelectorAll("#walk-line [data-id]")].map((e) => e.dataset.id).sort();
+  assert.eq(walkers, stillIn(page.game).sort(), "everyone still in, Sam too");
+  await until(() => visible(doc, "screen-talk"), "then the talk", 8000);
+});
+
+// Fire one stone at `id`, aiming where it will be when the stone lands.
+async function fireAt(page, doc, id) {
+  const field = doc.querySelector(".gallery-field");
+  const t = doc.querySelector(`.flyer[data-id="${id}"]`).dataset;
+  const aim = { x: +t.x + +t.vx * FLIGHT, y: +t.y + +t.vy * FLIGHT };
+  const pull = { x: (SLING.x - aim.x) / SLING_POWER, y: (SLING.y - aim.y) / SLING_POWER };
+  const r = field.getBoundingClientRect();
+  const at = (x, y) => ({ bubbles: true, pointerId: 1, clientX: r.left + x * r.width, clientY: r.top + y * r.height });
+  const before = doc.querySelector(".stones").textContent;
+  field.dispatchEvent(new page.PointerEvent("pointerdown", at(SLING.x, SLING.y)));
+  field.dispatchEvent(new page.PointerEvent("pointermove", at(SLING.x + pull.x, SLING.y + pull.y)));
+  field.dispatchEvent(new page.PointerEvent("pointerup", at(SLING.x + pull.x, SLING.y + pull.y)));
+  await until(() => doc.querySelector(".stones").textContent !== before || visible(doc, "mission-result"), "the stone lands", 8000);
+}
+// A target well away from the edges, so it won't bounce mid-flight.
+const easyTarget = (doc, want) => [...doc.querySelectorAll(".flyer:not(.hit)")].find((f) => {
+  const d = f.dataset;
+  const x = +d.x + +d.vx * FLIGHT, y = +d.y + +d.vy * FLIGHT;
+  return want(f.dataset.id) && x > 0.2 && x < 0.8 && y > 0.2 && y < 0.6;
+});
+
+test("Catapults: pull back, let go, and hit someone flying round; they're up for murder", async () => {
+  const { page, doc } = await toMission("catapults");
+  doc.getElementById("mission-go").click();
+  let hit = null;
+  for (let k = 0; k < 5 && !hit; k++) {
+    await until(() => easyTarget(doc, (id) => id !== "shield"), "a target in reach", 8000);
+    const id = easyTarget(doc, (x) => x !== "shield").dataset.id;
+    await fireAt(page, doc, id);
+    if (doc.querySelector(`.flyer.hit[data-id="${id}"]`)) hit = id;
+  }
+  assert.ok(hit, "one of five aimed stones hits");
+  // Barely pulling doesn't throw.
+  const field = doc.querySelector(".gallery-field");
+  if (!visible(doc, "mission-result")) {
+    const before = doc.querySelector(".stones").textContent;
+    const r = field.getBoundingClientRect();
+    const at = { bubbles: true, pointerId: 1, clientX: r.left + SLING.x * r.width, clientY: r.top + SLING.y * r.height };
+    field.dispatchEvent(new page.PointerEvent("pointerdown", at));
+    field.dispatchEvent(new page.PointerEvent("pointerup", at));
+    assert.eq(doc.querySelector(".stones").textContent, before, "no stone used");
+  }
+  while (!visible(doc, "mission-result")) {
+    const t = easyTarget(doc, () => true) ?? doc.querySelector(".flyer:not(.hit)");
+    await fireAt(page, doc, t.dataset.id);
+  }
+  await result(doc);
+  assert.ok(page.game.upForMurder.ids.includes(hit), "up for murder");
+  assert.ok(doc.getElementById("mission-extra").textContent.startsWith("Up for murder tonight"));
+});
+
+test("Catapults: hit the shield and it breaks", async () => {
+  const { page, doc } = await toMission("catapults");
+  doc.getElementById("mission-go").click();
+  for (let k = 0; k < 5 && !doc.querySelector('.flyer.hit[data-id="shield"]'); k++) {
+    await until(() => easyTarget(doc, (id) => id === "shield"), "the shield in reach", 15000);
+    await fireAt(page, doc, "shield");
+  }
+  while (!visible(doc, "mission-result")) await fireAt(page, doc, doc.querySelector(".flyer:not(.hit)").dataset.id);
+  await result(doc);
+  assert.eq(page.game.shields, []);
+  assert.ok(doc.getElementById("mission-shield").textContent.includes("broken"));
+});
+
+test("Cooking: cook their hated food and find the shield", async () => {
+  const { page, doc } = await toMission("cooking");
+  doc.getElementById("mission-go").click();
+  const diner = cookingDiner(page.game, stillIn(page.game));
+  assert.ok(doc.getElementById("diner-clue").textContent.includes(HATES[diner][1]), "the clue shows");
+  assert.ok(doc.getElementById("serve").disabled, "can't serve an empty plate");
+  const hated = HATES[diner][0];
+  const menu = truckFoods(page.game, diner);
+  assert.eq([...doc.querySelectorAll(".food")].map((f) => f.dataset.food), menu.flat(), "today's menu");
+  for (const foods of menu) doc.querySelector(`.food[data-food="${foods.includes(hated) ? hated : foods[0]}"]`).click();
+  doc.querySelector(`.box[data-box="${shieldTruck(page.game)}"]`).click();
+  assert.notOk(doc.getElementById("serve").disabled);
+  doc.getElementById("serve").click();
+  await until(() => visible(doc, "mission-result"), "the result", 8000);
+  assert.ok(doc.getElementById("mission-score").textContent.includes("least favourite"));
+  assert.ok(doc.getElementById("mission-shield").textContent.includes("You found a shield"));
+  assert.eq(page.game.shields[0], "pepper");
+});
+
+// ─── The other nine missions, played well ───────────────────────────────────
+
+async function playMission(id) {
+  const { page, doc } = await toMission(id);
+  doc.getElementById("mission-go").click();
+  return { page, doc, box: doc.querySelector("#mission-play .mission-box") };
+}
+const result = async (doc) => {
+  await until(() => visible(doc, "mission-result"), "the result", 15000);
+  return doc.getElementById("mission-score").textContent;
+};
+
+test("Who Was Where?: answer all three right", async () => {
+  const { page, doc, box } = await playMission("where");
+  const { questions } = whereRounds(page.game, stillIn(page.game));
+  for (const [i, q] of questions.entries()) {
+    await until(() => box.dataset.question === String(i) && box.querySelector(".where-option"), `question ${i + 1}`, 8000);
+    box.querySelector(`.where-option[data-id="${q.answer}"]`).click();
+  }
+  assert.eq(await result(doc), "You got 3 out of 3 right!");
+});
+
+test("Letter Jumble: spell all three names", async () => {
+  const { page, doc, box } = await playMission("jumble");
+  for (const [i, w] of jumbleWords(page.game, stillIn(page.game)).entries()) {
+    await until(() => box.dataset.word === String(i) && box.querySelector(".jumble-tile"), `word ${i + 1}`, 8000);
+    for (const letter of w.word) box.querySelector(`.jumble-tile[data-letter="${letter}"]:not(:disabled)`).click();
+  }
+  assert.eq(await result(doc), "You spelled 3 out of 3 names!");
+});
+
+test("Letter Jumble: a wrong try's clear-up can't wipe letters typed since (Sam got stuck)", async () => {
+  const { page, doc, box } = await playMission("jumble");
+  const w = jumbleWords(page.game, stillIn(page.game))[0];
+  await until(() => box.dataset.word === "0" && box.querySelector(".jumble-tile"), "word 1", 8000);
+  const tap = (sel) => box.querySelector(sel).click();
+  // A wrong try (the jumbled order), then Start again and two right letters
+  // straight away, before the wrong try's clear-up comes.
+  for (const t of [...box.querySelectorAll(".jumble-tile")]) t.click();
+  [...box.querySelectorAll("button")].find((b) => b.textContent === "Start again").click();
+  for (const letter of w.word.slice(0, 2)) tap(`.jumble-tile[data-letter="${letter}"]:not(:disabled)`);
+  await new Promise((r) => setTimeout(r, 50));
+  const slots = () => [...box.querySelectorAll(".jumble-slot")].map((s) => s.textContent).join("");
+  assert.eq(slots(), w.word.slice(0, 2), "the two letters are still there");
+  for (const letter of w.word.slice(2)) tap(`.jumble-tile[data-letter="${letter}"]:not(:disabled)`);
+  await until(() => box.dataset.word === "1", "on to word 2", 8000);
+});
+
+test("the leaderboard fits a phone: the button stays on screen, even with lots of players", async () => {
+  const { page, doc } = await toMission("jumble", 3, 750, 340);
+  doc.getElementById("mission-go").click();
+  page.missionGiveUp();
+  await until(() => visible(doc, "mission-result"), "the result", 15000);
+  const board = doc.getElementById("mission-leaders");
+  assert.gt(board.children.length, 4, "a leaderboard");
+  for (let i = 0; i < 16; i++) board.append(board.firstElementChild.cloneNode(true));   // lots of real players
+  const app = doc.getElementById("app").getBoundingClientRect();
+  const done = doc.getElementById("mission-done").getBoundingClientRect();
+  assert.ok(done.bottom <= app.bottom + 1 && done.top >= app.top, `the button is on screen (${Math.round(done.bottom)} <= ${Math.round(app.bottom)})`);
+});
+
+test("Letter Jumble: their picture as a clue, and Undo takes back a letter", async () => {
+  const { page, doc, box } = await playMission("jumble");
+  const w = jumbleWords(page.game, stillIn(page.game))[0];
+  await until(() => box.dataset.word === "0" && box.querySelector(".jumble-tile"), "word 1", 8000);
+  assert.ok(box.querySelector(".jumble-clue .badge, .jumble-clue .portrait"), "a picture clue");
+  const slots = () => [...box.querySelectorAll(".jumble-slot")].map((s) => s.textContent).join("");
+  const wrong = [...box.querySelectorAll(".jumble-tile")].find((t) => t.dataset.letter !== w.word[0]);
+  box.querySelector(`.jumble-tile[data-letter="${w.word[0]}"]`).click();
+  wrong.click();
+  assert.eq(slots(), w.word[0] + wrong.dataset.letter);
+  doc.getElementById("jumble-undo").click();
+  assert.eq(slots(), w.word[0], "the last letter is gone");
+  assert.notOk(wrong.disabled, "its tile is back");
+  for (const letter of w.word.slice(1)) box.querySelector(`.jumble-tile[data-letter="${letter}"]:not(:disabled)`).click();
+  await until(() => box.dataset.word === "1", "on to word 2", 8000);
+});
+
+test("Secret Code: crack all three words", async () => {
+  const { page, doc, box } = await playMission("code");
+  for (const [i, word] of secretCode(page.game).words.entries()) {
+    await until(() => box.dataset.word === String(i) && box.querySelector(".code-button"), `word ${i + 1}`, 8000);
+    for (const letter of word) box.querySelector(`.code-button[data-letter="${letter}"]`).click();
+  }
+  assert.eq(await result(doc), "You cracked 3 out of 3 secret words!");
+});
+
+test("Garden Maze: steer out with the joystick", async () => {
+  const { page, doc, box } = await playMission("maze");
+  const m = makeMaze(page.game);
+  const key = ([x, y]) => `${x},${y}`;
+  const from = new Map([[key(m.start), null]]);
+  const queue = [m.start];
+  while (queue.length) {
+    const at = queue.shift();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const n = [at[0] + dx, at[1] + dy];
+      if (n[0] < 0 || n[1] < 0 || n[0] >= MAZE_W || n[1] >= MAZE_H || from.has(key(n)) || !canStep(m, at, n)) continue;
+      from.set(key(n), at);
+      queue.push(n);
+    }
+  }
+  const path = [];
+  for (let at = m.exit; at; at = from.get(key(at))) path.unshift(at);
+  await until(() => box.querySelector(".joystick"), "the joystick");
+  const stick = box.querySelector(".joystick");
+  const r = stick.getBoundingClientRect();
+  const push = (type, x, y) => stick.dispatchEvent(new page.PointerEvent(type, {
+    bubbles: true, pointerId: 1, clientX: r.left + r.width / 2 + x * r.width / 2, clientY: r.top + r.height / 2 + y * r.height / 2,
+  }));
+  push("pointerdown", 0, 0);
+  const pos = () => box.dataset.pos.split(",").map(Number);
+  // Steer to the middle of each square in turn.
+  for (const [x, y] of path.slice(1)) {
+    await until(() => {
+      if (visible(doc, "mission-result")) return true;
+      const [px, py] = pos();
+      const dx = x + 0.5 - px, dy = y + 0.5 - py;
+      if (Math.hypot(dx, dy) < 0.08) return true;
+      const len = Math.max(Math.abs(dx), Math.abs(dy));
+      push("pointermove", Math.abs(dx) > 0.04 ? Math.sign(dx) * Math.min(1, len * 4) : 0, Math.abs(dy) > 0.04 ? Math.sign(dy) * Math.min(1, len * 4) : 0);
+      return false;
+    }, `square ${x},${y}`, 8000);
+    if (visible(doc, "mission-result")) break;
+  }
+  push("pointerup", 0, 0);
+  assert.eq(await result(doc), "You found the way out!");
+});
+
+test("Lost Keys: look behind the right things and find all five", async () => {
+  const { page, doc, box } = await playMission("keys");
+  const h = keyHides(page.game);
+  await until(() => box.querySelectorAll(".hide").length === 14, "the hiding places");
+  const empty = [...Array(14).keys()].find((i) => !h.keys.includes(i));
+  box.querySelector(`.hide[data-place="${empty}"]`).click();
+  assert.ok(doc.getElementById("mission-status").textContent.startsWith("Nothing"), "nothing behind that one");
+  for (const k of h.keys) box.querySelector(`.hide[data-place="${k}"]`).click();
+  assert.eq(await result(doc), "You found all 5 keys!");
+});
+
+test("Lost Keys: run out of looks", async () => {
+  const { page, doc, box } = await playMission("keys");
+  const h = keyHides(page.game);
+  await until(() => box.querySelectorAll(".hide").length === 14, "the hiding places");
+  const empties = [...Array(14).keys()].filter((i) => !h.keys.includes(i));
+  for (const i of empties.slice(0, 9)) box.querySelector(`.hide[data-place="${i}"]`).click();
+  assert.eq(await result(doc), "Out of looks! You found 0 out of 5 keys.");
+});
+
+
+test("Muddy Footprints: tap every boot print, never a fox or duck", async () => {
+  const { doc, box } = await playMission("footprints");
+  await until(() => {
+    for (const p of box.querySelectorAll('.print[data-kind="boot"]:not(:disabled)')) p.click();
+    return visible(doc, "mission-result");
+  }, "the trail ends", 20000);
+  assert.ok((await result(doc)).includes("You followed the trail"));
+});
+
+test("Muddy Footprints: tapping a fox print costs you", async () => {
+  const { doc, box } = await playMission("footprints");
+  await until(() => box.querySelector('.print[data-kind="fox"], .print[data-kind="duck"]'), "an animal print", 20000);
+  box.querySelector('.print[data-kind="fox"], .print[data-kind="duck"]').click();
+  assert.ok(doc.getElementById("mission-status").textContent.startsWith("Oops!"));
+});
+
+
+test("Portrait Gallery: spot every new picture", async () => {
+  const { page, doc, box } = await playMission("portraits");
+  for (const [i, round] of galleryRounds(page.game).entries()) {
+    await until(() => box.dataset.round === String(i) && box.querySelector(".gallery-pick"), `round ${i + 1}`, 8000);
+    box.querySelector(`.gallery-pick[data-id="${round.newcomer}"]`).click();
+  }
+  assert.eq(await result(doc), "You spotted 3 out of 3 new pictures!");
+});
+
+test("Treasure Hunt: wrong room, then warmer, then gold", async () => {
+  const { page, doc, box } = await playMission("treasure");
+  const spot = treasureSpot(page.game);
+  await until(() => box.querySelector(".treasure-room"), "the castle rooms");
+  const room = box.querySelector(".treasure-room");
+  const tapAt = (x, y) => {
+    const r = room.getBoundingClientRect();
+    room.dispatchEvent(new page.MouseEvent("click", { bubbles: true, clientX: r.left + x * r.width, clientY: r.top + y * r.height }));
+  };
+  const other = ["kitchen", "hall", "library", "garden"].find((r) => r !== spot.room);
+  box.querySelector(`.treasure-tabs [data-room="${other}"]`).click();
+  tapAt(0.5, 0.5);
+  assert.ok(doc.getElementById("mission-status").textContent.startsWith("Not in this room"));
+  box.querySelector(`.treasure-tabs [data-room="${spot.room}"]`).click();
+  tapAt(spot.x, spot.y);
+  assert.eq(await result(doc), "You found the gold in 2 taps!");
+});
+
+test("Lights Out: put all nine pieces back", async () => {
+  const { doc, box } = await playMission("lights");
+  await until(() => box.dataset.ready === "yes", "the pieces", 8000);
+  // Put pieces 0 and 1 the wrong way round, then the rest right.
+  const put = (piece, slot) => {
+    box.querySelector(`.lights-tray [data-piece="${piece}"]`).click();
+    box.querySelector(`.slot[data-slot="${slot}"]`).click();
+  };
+  put(0, 1);
+  put(1, 0);
+  for (let i = 2; i < 9; i++) put(i, i);
+  assert.notOk(visible(doc, "mission-result"), "nothing ends until you say");
+  // Swap the two placed pieces round.
+  box.querySelector('.slot[data-slot="0"]').click();
+  box.querySelector('.slot[data-slot="1"]').click();
+  box.querySelector("#lights-done").click();
+  assert.eq(await result(doc), "You built the whole shield in the dark!");
+});
+
+test("staying quiet at the Round Table: someone notices", async () => {
+  const { doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  await clickTable(doc);
+  await until(() => visible(doc, "talk-options"), "Sam's turn to speak", 8000);
+  const before = doc.querySelectorAll("#talk-lines .talk-line").length;
+  doc.querySelector("#talk-options .question:last-child").click();
+  await until(() => visible(doc, "to-vote"), "then the vote");
+  const lines = doc.querySelectorAll("#talk-lines .talk-line");
+  assert.eq(lines.length, before + 1, "one reply, no line from Sam");
+  assert.ok(lines[lines.length - 1].textContent.includes("Chef Pepper"), "they say Sam's name");
+});
+
+test("your own character is marked: the walk, your chalkboard, the reveal list", async () => {
+  const { doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  assert.ok(doc.querySelector('.puppet.me'), "your puppet glows in the castle");
+  await clickTable(doc);
+  assert.ok(doc.querySelector('#walk-line .me-cutout[data-id="pepper"]'), "you glow in the walk");
+  assert.eq(doc.querySelectorAll("#walk-line .me-cutout").length, 1, "only you");
+  await talkThenTable(doc);
+  doc.querySelector("#table-cards .card").click();
+  doc.getElementById("cast-vote").click();
+  await until(() => doc.querySelector(".chalkboard.me-board"), "your chalkboard", 20000);
+  assert.ok(doc.querySelector(".chalkboard.me-board").textContent.includes("Chef Pepper (you)"));
+});
+
+test("pause: shows everyone, and closes again", async () => {
+  const { doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  assert.ok(visible(doc, "pause"));
+  doc.getElementById("pause").click();
+  assert.ok(visible(doc, "overview"));
+  assert.eq(doc.querySelectorAll("#overview-people .who").length, 22);
+  assert.ok(doc.querySelector('.who.who-you[data-id="pepper"]'));
+  doc.getElementById("overview-close").click();
+  assert.notOk(visible(doc, "overview"));
+});
+
+test("saving: reload the page and carry on from the day you got to", async () => {
+  const { page } = await toCastle(seedFor("pepper", FAITHFUL));
+  const day = page.game.day;
+  const again = await openPage("../index.html?fast=1");
+  const doc = again.document;
+  await until(() => visible(doc, "carry-on"), "a Carry on button");
+  assert.ok(doc.getElementById("carry-on").textContent.includes("Chef Pepper"));
+  doc.getElementById("carry-on").click();
+  await until(() => visible(doc, "screen-castle"), "back in the castle");
+  assert.eq(again.game.day, day);
+  assert.eq(again.game.playerId, "pepper");
+  assert.ok(doc.querySelector(".puppet.me"));
+});
+
+// ─── The final and the end ──────────────────────────────────────────────────
+import { allTraitors as everyTraitor } from "../../js/castle.js";
+
+// Sam (Chef Pepper, Faithful) plus one Traitor and four Faithfuls, at the
+// final. Nobody stands out on anyone's list, so they all want to end it.
+function setUpFinal(page) {
+  const g = page.game;
+  const traitor = g.players.find((p) => p.side === TRAITOR && p.id !== "pepper").id;
+  const faithful = g.players.filter((p) => p.side === FAITHFUL && p.id !== "pepper").slice(0, 4).map((p) => p.id);
+  const keep = ["pepper", traitor, ...faithful];
+  for (const p of g.players) p.inGame = keep.includes(p.id);
+  for (const id of Object.keys(g.scores)) for (const o of Object.keys(g.scores[id])) g.scores[id][o] = 0.3;
+  g.day = 13;
+  g.pot = 12000;
+  return keep;
+}
+
+test("after day 12's vote comes the final", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  page.game.day = 12;
+  await voteAndReveal(doc);
+  if (!visible(doc, "after-reveal")) return;   // Sam was banished: that's the end
+  assert.eq(doc.getElementById("next-day").textContent, "On to the final!");
+  await clickNext(doc);
+  assert.ok(visible(doc, "screen-final"));
+});
+
+test("the final: everyone ends it, then the big reveal, the money, and every Traitor", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const keep = setUpFinal(page);
+  page.castleJump.finalScreen();
+  assert.ok(visible(doc, "screen-final"));
+  doc.querySelector('#final-choice [data-vote="end"]').click();
+  await until(() => visible(doc, "final-next"), "everyone's flames", 15000);
+  assert.ok([...doc.querySelectorAll("#final-votes .final-vote")].every((t) => t.dataset.vote === "end"), "all green");
+  assert.eq(doc.querySelectorAll("#final-votes .final-vote").length, keep.length);
+  assert.ok(doc.getElementById("final-result").textContent.startsWith("Every flame is green"));
+  doc.getElementById("final-next").click();
+  await until(() => visible(doc, "ending-result"), "the big reveal", 15000);
+  assert.eq(doc.querySelectorAll("#ending-reveal .ending-tile").length, keep.length, "everyone left turns round");
+  assert.eq(doc.getElementById("ending-winner").textContent, "The Traitors win!");
+  assert.ok(doc.getElementById("ending-money").textContent.startsWith("Oh no!"), "Sam's a Faithful: no money");
+  assert.eq(doc.querySelectorAll("#ending-traitors .who").length, everyTraitor(page.game).length, "every Traitor of the game");
+  assert.ok(visible(doc, "ending-play-again"));
+});
+
+test("the final: if anyone wants to banish again, back to the Round Table", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  setUpFinal(page);
+  page.castleJump.finalScreen();
+  assert.eq(doc.querySelectorAll('#final-choice [data-vote="end"]').length, 2, "two ways to say end");
+  assert.eq(doc.querySelectorAll('#final-choice [data-vote="banish"]').length, 2, "two ways to say banish");
+  doc.querySelector('#final-choice [data-vote="banish"]').click();
+  await until(() => visible(doc, "final-next"), "everyone's flames", 15000);
+  assert.eq(doc.querySelector('#final-votes .final-vote[data-id="pepper"]').dataset.vote, "banish", "your red flame");
+  assert.ok(doc.getElementById("final-result").textContent.includes("Back to the Round Table"));
+  doc.getElementById("final-next").click();
+  assert.ok(visible(doc, "screen-table"));
+});
+
+test("when your side wins: your share of the pot, and a party", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  setUpFinal(page);
+  for (const p of page.game.players) if (p.side === TRAITOR) p.inGame = false;   // all caught
+  page.castleJump.ending();
+  await until(() => visible(doc, "ending-result"), "the big reveal", 15000);
+  assert.eq(doc.getElementById("ending-winner").textContent, "The Faithfuls win!");
+  assert.ok(doc.getElementById("ending-money").textContent.startsWith("You win £2,400!"), doc.getElementById("ending-money").textContent);
+  assert.ok(visible(doc, "confetti"));
+});
+
+test("your character's name shows (with 'you'), not just 'You'", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  page.castleTick();
+  assert.eq(doc.querySelector('.name-tag[data-id="pepper"]').textContent, "Chef Pepper (you)");
+  doc.getElementById("pause").click();
+  assert.ok(doc.querySelector('.who-you').textContent.includes("Chef Pepper (you)"));
+  assert.notOk([...doc.querySelectorAll("button, span, b, p")].some((e) => e.childElementCount === 0 && e.textContent.trim() === "You"), "no bare 'You' anywhere");
+});
+
+test("whoever has a shield wears Sam's shield necklace", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const room = page.world.me.room;
+  const id = Object.entries(page.world.people).find(([, p]) => p.room === room)[0];
+  page.game.shields = [id];
+  page.castleTick();
+  const puppet = doc.querySelector(`.puppet[data-id="${id}"]`);
+  assert.ok(puppet.classList.contains("has-shield"));
+  assert.eq(page.getComputedStyle(puppet.querySelector(".necklace")).display, "block", "the necklace shows");
+  const other = doc.querySelector(`.puppet:not([data-id="${id}"]) .necklace`);
+  if (other) assert.eq(page.getComputedStyle(other).display, "none", "nobody else wears one");
+  await clickTable(doc);
+  assert.ok(doc.querySelector(`#walk-line .wearing .cutout[data-id="${id}"]`), "wearing it on the walk too");
+});
+
+
+test("the dagger: news at breakfast, held all day, x2 on the chalkboard", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const g = page.game;
+  const holder = stillIn(g).find((id) => id !== "pepper");
+  g.dagger = { holder, day: g.day };
+  // Breakfast news (as if it was given last night).
+  page.castleTick();
+  const puppet = doc.querySelector(`.puppet[data-id="${holder}"]`);
+  if (puppet) assert.eq(page.getComputedStyle(puppet.querySelector(".held-dagger")).display, "block", "holding it");
+  await clickTable(doc);
+  assert.ok(doc.querySelector(`#walk-line .wearing.has-dagger .cutout[data-id="${holder}"]`), "holding it on the walk");
+  await talkThenTable(doc);
+  doc.querySelector("#table-cards .card").click();
+  doc.getElementById("cast-vote").click();
+  await until(() => !doc.getElementById("to-reveal").hidden, "the chalkboards", 20000);
+  assert.eq(doc.querySelectorAll(".dagger-x2").length, 1, "the holder's board says x2");
+});
+
+test("a Traitor Sam chooses who gets the dagger when it's down to 8", async () => {
+  const { page, doc } = await toCastle(nightSeed(TRAITOR));
+  await voteAndReveal(doc);
+  if (!visible(doc, "after-reveal")) return;
+  for (const p of page.game.players.filter((x) => x.inGame && x.id !== "pepper" && x.side !== TRAITOR).slice(0, 999)) {
+    if (stillIn(page.game).length <= 8) break;
+    p.inGame = false;
+  }
+  await clickNext(doc);
+  await until(() => visible(doc, "screen-traitors") || visible(doc, "to-breakfast"), "the night", 8000);
+  if (visible(doc, "to-breakfast")) doc.getElementById("to-breakfast").click();
+  else {
+    doc.querySelector("#victim-cards .card").click();
+    doc.getElementById("murder").click();
+  }
+  await until(() => visible(doc, "screen-traitors") && doc.getElementById("murder").textContent.includes("dagger"), "the dagger choice", 8000);
+  const pick = doc.querySelector('#victim-cards .card[data-id="pepper"]');
+  assert.ok(pick, "Sam can give it to himself");
+  pick.click();
+  doc.getElementById("murder").click();
+  await until(() => visible(doc, "start-day") || visible(doc, "breakfast-over"), "breakfast", 10000);
+  assert.ok(doc.getElementById("dagger-news").textContent.includes("gave YOU the dagger"));
+});
+
+
+test("Round Table talk: bubbles take turns left and right; only the newest two show (Gareth)", async () => {
+  const { doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  await clickTable(doc);
+  await until(() => visible(doc, "talk-options"), "Sam's turn", 15000);
+  await new Promise((r) => setTimeout(r, 50));
+  const all = [...doc.querySelectorAll("#talk-lines .talk-line")];
+  assert.gt(all.length, 2, "several lines");
+  const showing = all.filter((l) => l.offsetParent !== null);
+  assert.eq(showing.length, 2, "two showing");
+  assert.eq(showing.map((l) => l.classList.contains("talk-left")).filter(Boolean).length, 1, "one each side");
+});
+
+test("Round Table talk: lots of lines, and the buttons stay on the screen", async () => {
+  const { doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  await clickTable(doc);
+  await until(() => visible(doc, "talk-options"), "Sam's turn", 15000);
+  // Pile on extra lines, like a long talk.
+  const lines = doc.getElementById("talk-lines");
+  for (let i = 0; i < 12; i++) lines.append(lines.firstElementChild.cloneNode(true));
+  const screenBottom = doc.getElementById("screen-talk").getBoundingClientRect().bottom;
+  for (const b of doc.querySelectorAll("#talk-options .question")) assert.ok(b.getBoundingClientRect().bottom <= screenBottom + 1, "a choice is on the screen");
+  doc.querySelector("#talk-options .question").click();
+  await until(() => visible(doc, "to-vote"), "Time to vote");
+  assert.ok(doc.getElementById("to-vote").getBoundingClientRect().bottom <= screenBottom + 1, "the vote button is on the screen");
+});
+
+
+test("a Traitor sees fellow Traitors marked in red; a Faithful sees nothing", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", TRAITOR));
+  const fellows = page.game.players.filter((p) => p.side === TRAITOR && p.id !== "pepper").map((p) => p.id);
+  page.castleTick();
+  doc.getElementById("pause").click();
+  for (const id of fellows) assert.ok(doc.querySelector(`.who[data-id="${id}"] .fellow-badge`), `${id} is marked`);
+  assert.eq(doc.querySelectorAll("#overview-people .fellow-badge").length, fellows.length, "only them");
+  doc.getElementById("overview-close").click();
+  for (const tag of doc.querySelectorAll(".name-tag")) assert.eq(tag.classList.contains("fellow"), fellows.includes(tag.dataset.id), tag.dataset.id);
+  const faithful = await toCastle(seedFor("pepper", FAITHFUL));
+  faithful.doc.getElementById("pause").click();
+  assert.eq(faithful.doc.querySelectorAll(".fellow-badge").length, 0, "a Faithful can't tell");
+});
+
+
+test("a no-murder night is announced at breakfast and shown in the castle", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const g = page.game;
+  // Day 5 with 12 left: tonight can't have a murder.
+  g.day = 5;
+  for (const p of g.players.filter((x) => x.inGame && x.side !== TRAITOR && x.id !== "pepper")) {
+    if (stillIn(g).length <= 12) break;
+    p.inGame = false;
+  }
+  page.castleJump.showRoster();
+  assert.ok(visible(doc, "quiet-news"), "announced at breakfast");
+  page.castleJump.enterCastle();
+  assert.ok(visible(doc, "no-murder"), "reminder in the castle");
+});
+
+test("only 2 Traitors left: a Traitor Sam chooses recruit or murder", async () => {
+  const { page, doc } = await toCastle(nightSeed(TRAITOR));
+  await voteAndReveal(doc);
+  if (!visible(doc, "after-reveal")) return;
+  const g = page.game;
+  g.history.unshift({ quiet: true });   // not night 1
+  const others = g.players.filter((p) => p.inGame && p.side === TRAITOR && p.id !== "pepper");
+  for (const p of others.slice(1)) p.inGame = false;   // Sam and one more
+  await clickNext(doc);
+  await until(() => visible(doc, "screen-traitors") && doc.querySelector(".choose-option"), "the choice", 8000);
+  const choices = [...doc.querySelectorAll(".choose-option")].map((b) => b.textContent);
+  assert.ok(choices.includes("Recruit someone new"));
+  assert.ok(choices.includes("Murder someone") || choices.includes("Do nothing tonight"));
+  doc.querySelector(".choose-option").click();
+  await until(() => doc.getElementById("murder").textContent.includes("Recruit"), "on to recruiting");
+  assert.ok(doc.querySelectorAll("#victim-cards .card").length > 0);
+});
+
+
+test("Catapults day is never announced as a no-murder day (Sam's bug)", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const g = page.game;
+  const { missionOrder } = await import("../../js/missions.js");
+  // Find a day in this game whose mission is Catapults, and make it a day
+  // that would otherwise be quiet (12 left on that day).
+  const day = missionOrder(g).findIndex((m) => m.id === "catapults") + 2;
+  if (day < 2) return;
+  g.day = day;
+  for (const p of g.players.filter((x) => x.inGame && x.side !== TRAITOR && x.id !== "pepper")) {
+    if (stillIn(g).length <= 4 + (12 - day)) break;
+    p.inGame = false;
+  }
+  page.castleJump.showRoster();
+  assert.notOk(visible(doc, "quiet-news"), "no promise of a quiet night on Catapults day");
+});
+
+test("multiplayer: tapping another real player says to talk to them for real", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  page.game.humans = ["pepper", "puddle"];
+  Object.assign(page.world.people.puddle, { room: page.world.me.room, mode: "chat", with: "pepper", timer: 99, x: 0.3, y: 0.85 });
+  page.castleTick();
+  doc.querySelector('.puppet[data-id="puddle"]').click();
+  assert.ok(visible(doc, "screen-chat"));
+  assert.ok(doc.getElementById("bubble-text").textContent.includes("real player"));
+  assert.eq(doc.querySelectorAll("#questions .question").length, 0, "no computer questions");
+});
+
+
+// ─── A draw (Gareth, 2026-10-29) ────────────────────────────────────────────
+test("a draw: the tied pair speak, then everyone else votes between just them", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const [a, b] = stillIn(page.game).filter((id) => id !== "pepper");
+  const before = stillIn(page.game).length;
+  page.castleJump.tie([a, b]);
+  await until(() => visible(doc, "to-vote"), "they've had their say", 10000);
+  assert.eq(doc.querySelectorAll("#talk-lines .talk-line").length, 2, "one line each");
+  assert.eq(doc.getElementById("to-vote").textContent, "Vote again");
+  doc.getElementById("to-vote").click();
+  assert.eq([...doc.querySelectorAll("#table-cards .card")].map((c) => c.dataset.id).sort(), [a, b].sort(), "just the two");
+  doc.querySelector("#table-cards .card").click();
+  doc.getElementById("cast-vote").click();
+  await until(() => visible(doc, "to-reveal"), "the new votes", 15000);
+  assert.eq(doc.querySelectorAll("#boards .chalkboard").length, before - 2, "a chalkboard from everyone but the tied pair");
+});
+
+test("tied yourself: pick what to say, then sit out the new vote", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const other = stillIn(page.game).find((id) => id !== "pepper");
+  page.castleJump.tie(["pepper", other]);
+  await until(() => visible(doc, "talk-options"), "your turn to speak", 10000);
+  doc.querySelector("#talk-options .question").click();
+  await until(() => visible(doc, "to-vote"), "both have spoken", 10000);
+  assert.eq(doc.getElementById("to-vote").textContent, "On to the vote");
+  doc.getElementById("to-vote").click();
+  assert.ok(visible(doc, "screen-votes"), "no cards for you: you can't vote");
+  await until(() => visible(doc, "to-reveal"), "the others voted", 15000);
+  assert.notOk([...doc.querySelectorAll("#boards .chalkboard")].some((b) => b.classList.contains("me-board")), "no chalkboard from you");
+});
+
+test("still a draw: pick a chest; the empty chest's owner leaves", async () => {
+  const { page, doc } = await toCastle(seedFor("pepper", FAITHFUL));
+  const other = stillIn(page.game).find((id) => id !== "pepper");
+  const before = stillIn(page.game).length;
+  page.castleJump.tie(["pepper", other], true);
+  await until(() => visible(doc, "screen-chests"), "the chests");
+  assert.eq(doc.querySelectorAll("#chests .chest").length, 2, "a chest each");
+  doc.querySelector('#chests .chest[data-chest="1"]').click();
+  await until(() => visible(doc, "chests-go"), "the chests are opened", 10000);
+  assert.eq(doc.querySelectorAll("#chests .chest.empty").length, 1, "one empty");
+  assert.eq(doc.querySelectorAll("#chests .chest.safe").length, 1, "one shield");
+  assert.eq(stillIn(page.game).length, before - 1, "one person out");
+  doc.getElementById("chests-go").click();
+  assert.ok(visible(doc, "screen-banished"), "the reveal");
+});
