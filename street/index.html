@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <!-- Fill the iPad screen, no pinch or double-tap zoom while playing. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <!-- Added to the Home Screen, it opens full screen like an app. -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Project Charlie">
+  <!-- The Home Screen icon: Charlie's blue helper, his choice. -->
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="icon" href="assets/icons/apple-touch-icon.png">
+  <title>Project Charlie</title>
+  <!-- STAMP (tools/stamp.py writes this; don't edit by hand) -->
+  <script type="importmap">{
+  "imports": {
+    "./js/art.js": "./js/art.js?v=0.14.2",
+    "./js/attacks.js": "./js/attacks.js?v=0.14.2",
+    "./js/baddie_brain.js": "./js/baddie_brain.js?v=0.14.2",
+    "./js/baddies.js": "./js/baddies.js?v=0.14.2",
+    "./js/controls.js": "./js/controls.js?v=0.14.2",
+    "./js/fight.js": "./js/fight.js?v=0.14.2",
+    "./js/gems.js": "./js/gems.js?v=0.14.2",
+    "./js/hud.js": "./js/hud.js?v=0.14.2",
+    "./js/input.js": "./js/input.js?v=0.14.2",
+    "./js/layout.js": "./js/layout.js?v=0.14.2",
+    "./js/main.js": "./js/main.js?v=0.14.2",
+    "./js/playtest.js": "./js/playtest.js?v=0.14.2",
+    "./js/version.js": "./js/version.js?v=0.14.2",
+    "./js/walk.js": "./js/walk.js?v=0.14.2",
+    "./js/waves.js": "./js/waves.js?v=0.14.2"
+  }
+}</script>
+  <link rel="stylesheet" href="css/style.css?v=0.14.2">
+  <!-- /STAMP -->
+</head>
+<body>
+  <!-- The whole game is drawn on this one canvas. -->
+  <canvas id="game"></canvas>
+  <!-- Back to Charlie's games (his home page). -->
+  <a id="home" href="../" aria-label="Charlie's games"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 30 L32 9 L56 30" fill="none" stroke="#261a40" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 27 V55 H49 V27" fill="#ff8a5c" stroke="#261a40" stroke-width="6" stroke-linejoin="round"/><rect x="27" y="37" width="11" height="18" fill="#261a40"/></svg></a>
+  <div id="version">v0.0.0</div>
+  <script type="module" src="js/main.js?v=0.14.2"></script>
+</body>
+</html>

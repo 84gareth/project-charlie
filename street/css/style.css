@@ -24,9 +24,26 @@ html, body {
 /* Small, in the corner, for Dad: which version is on the iPad. */
 #version {
   position: fixed;
-  top: max(8px, env(safe-area-inset-top));
+  top: calc(max(10px, env(safe-area-inset-top)) + 70px);
   right: max(12px, env(safe-area-inset-right));
   font: 14px ui-sans-serif, system-ui, sans-serif;
   color: rgba(40, 44, 60, 0.6);
   pointer-events: none;
 }
+
+/* Back to Charlie's games (his home page): a little house, top right. */
+#home {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: #ffd84d;
+  border: 4px solid #261a40;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#home svg { width: 46px; height: 46px; }

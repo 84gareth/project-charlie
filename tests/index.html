@@ -2,11 +2,9 @@
 <html lang="en-GB">
 <head>
   <meta charset="utf-8">
-  <title>Tests</title>
+  <title>Home page tests</title>
   <style>
     body { font: 14px/1.4 ui-monospace, Menlo, monospace; margin: 16px; }
-    /* On screen but almost invisible: browsers pause animation in frames
-       placed off-screen. */
     iframe { position: fixed; left: 0; top: 0; opacity: 0.02; pointer-events: none; z-index: -1; }
   </style>
 </head>
@@ -14,26 +12,11 @@
   <pre id="out">Running...</pre>
   <script type="module">
     import { run } from "./framework.js";
-    // Every test file. A new file must be added here to run.
+    // Charlie's home page, where he picks a game. Each game has its own
+    // tests in street/tests and traitors/tests. A new file must be added
+    // here to run.
     const FILES = [
-      "unit/test_version.js",
-      "unit/test_layout.js",
-      "unit/test_walk.js",
-      "unit/test_controls.js",
-      "unit/test_playtest.js",
-      "unit/test_attacks.js",
-      "unit/test_baddie_brain.js",
-      "unit/test_baddies.js",
-      "unit/test_waves.js",
-      "unit/test_gems.js",
-      "unit/test_fight.js",
-      "unit/test_teleport.js",
-      "unit/test_trees.js",
-      "live/test_page_live.js",
-      "live/test_walk_live.js",
-      "live/test_attack_live.js",
-      "live/test_fight_live.js",
-      "live/test_hearts_live.js",
+      "test_home_live.js",
     ];
     run(FILES);
   </script>
