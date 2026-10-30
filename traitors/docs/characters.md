@@ -1,3 +1,31 @@
+# The 22 characters (Charlie's Traitors)
+
+Charlie's Traitors is a copy of Project Sam's game (2026-10-30). The
+characters, their names and what they're like all come from Sam's game.
+
+## Charlie's drawings
+To start with, every character has a made-up placeholder picture (Gareth:
+"images you've generated as placeholders for now that we can swap out
+later"), made by `tools/placeholders/make_placeholders.py` and
+`tools/image-fix/svg_to_png.gd`. The shield, dagger, fire pit and flames are
+placeholders too. Each is replaced as Charlie draws it:
+
+1. Save the photo in `drawings/` (at the top of the project).
+2. The picture on cards: crop to the drawing and save as
+   `traitors/assets/characters/<id>.jpg`, about 700 tall.
+3. The puppet that walks round the castle:
+   `Godot --headless --path tools/image-fix --script res://cutout.gd -- <photo> traitors/assets/puppets/<id>.png`
+   then shrink it to 320 tall (`sips --resampleHeight 320`). Use `crop=`,
+   `erase=` and `sat=` for photos with a tablecloth or blue-looking paper.
+4. Note it below, bump the version in `traitors/js/version.js`, run
+   `python3 tools/stamp.py`.
+
+Done so far: none (all placeholders).
+
+---
+
+The rest is Project Sam's notes, kept for reference.
+
 # The 22 characters ✅ all approved
 
 Made up by Claude, 2026-10-24. Sam approved every one: "put all of them

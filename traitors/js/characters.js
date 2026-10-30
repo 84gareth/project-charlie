@@ -1,6 +1,8 @@
-// The 22 characters, all approved by Sam on 2026-10-24
+// The 22 characters, from Project Sam (Sam approved them on 2026-10-24)
 // (docs/characters.md). Pure data: no page code.
-// `picture`: Sam's drawing, once he's done it (assets/characters/<id>.jpg).
+// `picture`: assets/characters/<id>.jpg. In Charlie's Traitors these start
+// as made-up placeholders (tools/placeholders/), replaced by Charlie's own
+// drawings as he does them (docs/characters.md).
 // Without one, the game shows a coloured circle with their initials.
 
 export const CHARACTERS = [

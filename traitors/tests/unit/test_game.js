@@ -83,6 +83,6 @@ test("every drawing listed for a character really exists", async () => {
   }
 });
 
-test("Sam has drawn all 22 characters", () => {
+test("all 22 characters have a picture (placeholders until Charlie draws them)", () => {
   assert.eq(CHARACTERS.filter((c) => c.picture).length, 22);
 });
