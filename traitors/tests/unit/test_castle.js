@@ -403,7 +403,7 @@ test("staying quiet is risky: honest players suspect Sam more, and someone says 
   const before = honest.map((h) => g.scores[h].dot);
   const reply = playerSays(g, { kind: "quiet", target: null });
   honest.forEach((h, i) => assert.near(g.scores[h].dot, before[i] + QUIET_RISK, 1e-9, h));
-  assert.ok(reply.text.includes("Detective Dot"), reply.text);
+  assert.ok(reply.text.includes("Zoe"), reply.text);
   assert.eq(reply.names, ["dot"]);
 });
 

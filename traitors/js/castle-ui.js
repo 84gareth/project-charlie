@@ -124,17 +124,17 @@ function enterCastle() {
 // (Gareth: Benny Biscuit's was over his face; tall hats push chins down).
 // Measured by eye from the cut-outs, 2026-10-25.
 const NECK = {
-  puddle: 0.33, gumdrop: 0.22, fizz: 0.19, ruby: 0.28, pepper: 0.33, waffle: 0.34,
-  plaster: 0.25, lola: 0.23, fern: 0.32, dot: 0.30, benny: 0.45, mystic: 0.41,
-  tom: 0.19, zara: 0.25, grumble: 0.20, penny: 0.29, kick: 0.22, stan: 0.32,
-  ivy: 0.27, max: 0.33, olive: 0.18, barry: 0.28,
+  puddle: 0.33, gumdrop: 0.22, fizz: 0.33, ruby: 0.28, pepper: 0.33, waffle: 0.34,
+  plaster: 0.25, lola: 0.23, fern: 0.32, dot: 0.29, benny: 0.45, mystic: 0.41,
+  tom: 0.37, zara: 0.29, grumble: 0.20, penny: 0.29, kick: 0.37, stan: 0.32,
+  ivy: 0.27, max: 0.38, olive: 0.18, barry: 0.28,
 };
 // ...and across, where the head isn't in the middle of the picture (a goat
 // on a lead, a pie held out). Anyone not listed is in the middle (0.5).
 const NECK_X = {
-  gumdrop: 0.43, fizz: 0.42, pepper: 0.36, waffle: 0.45, plaster: 0.55, lola: 0.58,
-  fern: 0.30, dot: 0.45, mystic: 0.60, tom: 0.55, penny: 0.42, kick: 0.45,
-  ivy: 0.36, barry: 0.38,
+  gumdrop: 0.43, fizz: 0.45, pepper: 0.36, waffle: 0.45, plaster: 0.55, lola: 0.58,
+  fern: 0.30, dot: 0.45, mystic: 0.60, tom: 0.50, penny: 0.42, kick: 0.47,
+  ivy: 0.36, barry: 0.38, zara: 0.46,
 };
 // The chain shows from 8.8% below the necklace's top (its hidden part).
 const NECK_HIDDEN = 0.088;

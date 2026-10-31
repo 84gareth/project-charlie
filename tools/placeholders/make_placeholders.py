@@ -179,6 +179,11 @@ ITEMS = {
 }
 
 
+# Charlie has drawn these: never make a placeholder over his drawing. Add
+# each new one here (and delete its SVGs). See tools/image-fix/charlie_traitors.sh.
+DRAWN = {"dot", "max", "zara", "kick", "fizz", "tom", "dagger", "shield"}
+
+
 def characters():
     """Each character's id and colour, read from the game's own list."""
     src = (HERE.parent.parent / "traitors/js/characters.js").read_text()
@@ -192,12 +197,16 @@ def main():
         sys.exit(f"expected 22 characters in traitors/js/characters.js, found {len(chars)}")
     OUT.mkdir(exist_ok=True)
     for i, c in enumerate(chars):
+        if c["id"] in DRAWN:
+            continue
         (OUT / f'{c["id"]}.svg').write_text(character_svg(i, c, True))
         (OUT / f'{c["id"]}-puppet.svg').write_text(character_svg(i, c, False))
     for name, (w, h, body) in ITEMS.items():
+        if name in DRAWN:
+            continue
         (OUT / f"{name}.svg").write_text(
             f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">{body}</svg>')
-    print(f"wrote {len(chars) * 2 + len(ITEMS)} SVGs to {OUT}")
+    print(f"wrote the SVGs to {OUT}, skipping Charlie's drawings")
 
 
 main()

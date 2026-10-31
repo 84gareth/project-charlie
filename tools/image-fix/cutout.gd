@@ -11,14 +11,14 @@ extends SceneTree
 # drawing and scales it to HEIGHT pixels tall.
 #
 #   Godot --headless --path tools/image-fix --script res://cutout.gd -- \
-#       <in.jpg> <out.png> [crop=x,y,w,h] [erase=x,y;x,y;...] [grow=N] [sat=N]
+#       <in.jpg> <out.png> [crop=x,y,w,h] [keep=x,y;...] [erase=x,y;x,y;...] [grow=N] [sat=N] [height=N]
 #
 # crop= takes one drawing from a page with several (applied first, so
 # erase= points are then in the cropped picture's pixels).
 #
 # erase= paints a polygon (photo pixels) with plain paper first: for the
 # tablecloth showing in a corner of the photo.
-const HEIGHT := 400
+var HEIGHT := 400
 const PAPER := Color(0.97, 0.96, 0.93)
 var GROW := 9
 
@@ -83,6 +83,18 @@ func keep_big_parts(mask: PackedByteArray, w: int, h: int) -> PackedByteArray:
 			out[k] = 1
 	return out
 
+# Everything OUTSIDE a polygon becomes plain paper: for a small cut-out
+# lying on a patterned sofa, trace round the paper with keep=.
+func keep_polygon(img: Image, spec: String) -> void:
+	var pts := PackedVector2Array()
+	for pair in spec.split(";"):
+		var xy := pair.split(",")
+		pts.append(Vector2(float(xy[0]), float(xy[1])))
+	for y in img.get_height():
+		for x in img.get_width():
+			if not Geometry2D.is_point_in_polygon(Vector2(x, y), pts):
+				img.set_pixel(x, y, PAPER)
+
 func erase_polygon(img: Image, spec: String) -> void:
 	var pts := PackedVector2Array()
 	for pair in spec.split(";"):
@@ -103,7 +115,11 @@ func _initialize() -> void:
 			var r := extra.substr(5).split(",")
 			img = img.get_region(Rect2i(int(r[0]), int(r[1]), int(r[2]), int(r[3])))
 	for extra in a.slice(2):
-		if extra.begins_with("erase="):
+		if extra.begins_with("height="):
+			HEIGHT = int(extra.substr(7))
+		elif extra.begins_with("keep="):
+			keep_polygon(img, extra.substr(5))
+		elif extra.begins_with("erase="):
 			erase_polygon(img, extra.substr(6))
 		elif extra.begins_with("grow="):
 			GROW = int(extra.substr(5))

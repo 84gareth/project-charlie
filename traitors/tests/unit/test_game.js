@@ -86,3 +86,11 @@ test("every drawing listed for a character really exists", async () => {
 test("all 22 characters have a picture (placeholders until Charlie draws them)", () => {
   assert.eq(CHARACTERS.filter((c) => c.picture).length, 22);
 });
+
+// Charlie's own characters (2026-10-31), in the places of Sam's they took.
+test("Charlie's characters are in the game, with his names", () => {
+  const name = (id) => CHARACTERS.find((c) => c.id === id).name;
+  assert.eq(["dot", "max", "zara", "kick", "fizz", "tom"].map(name),
+    ["Zoe", "Max", "Zeebee", "Coby", "Zeer", "Tendo"]);
+  assert.eq(CHARACTERS.find((c) => c.id === "dot").about, "Likes playing games like Traitors!", "Charlie's words");
+});

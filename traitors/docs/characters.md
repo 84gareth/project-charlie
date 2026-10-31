@@ -20,7 +20,25 @@ placeholders too. Each is replaced as Charlie draws it:
 4. Note it below, bump the version in `traitors/js/version.js`, run
    `python3 tools/stamp.py`.
 
-Done so far: none (all placeholders).
+Make them with `tools/image-fix/charlie_traitors.sh` (one line per drawing,
+holding the outline of the paper in the photo), and add each new id to
+`DRAWN` in `tools/placeholders/make_placeholders.py` so a placeholder can
+never paint over it. Measure the chin in `NECK` (`js/castle-ui.js`) too.
+
+Done so far (Charlie's name, in the place of Sam's character, 2026-10-31).
+Each keeps that character's id and how they talk until Charlie says
+otherwise:
+- Zoe (`dot`, was Detective Dot; Charlie: "She likes playing games like
+  traitors!", so her lines changed)
+- Max (`max`, was Max Muddle: still always gets lost)
+- Zeebee (`zara`, was Zara Zoom: still a racing cyclist, Claude's pick)
+- Coby (`kick`, was Coach Kick: still a football coach, Claude's pick)
+- Zeer (`fizz`, was Professor Fizz: still a scientist, Claude's pick)
+- Tendo (`tom`, was Tiny Tom: still very tall, Claude's pick)
+- The shield, the double vote dagger, and the castle (the castle replaces
+  the picture Sam's game had, and makes the game's Home Screen icon)
+
+Still placeholders: the other 16 characters, the fire pit and the flames.
 
 ---
 

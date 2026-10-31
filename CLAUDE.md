@@ -253,7 +253,11 @@ themselves, and nothing Charlie changes reaches Sam's.
 - **Pictures:** every character, the shield, dagger, fire pit and flames
   start as made-up placeholders (`tools/placeholders/`), swapped for
   Charlie's drawings one at a time: how in `traitors/docs/characters.md`.
-  The station, castle and rooms are made pictures from Sam's game and stay.
+  The castle is Charlie's since v0.3.0; the station and rooms are made
+  pictures from Sam's game. Charlie's so far: Zoe, Max, Zeebee, Coby, Zeer,
+  Tendo, the shield and dagger; `tools/image-fix/charlie_traitors.sh` makes
+  them all. Each takes a Sam character's place and keeps its id and way of
+  talking unless Charlie says otherwise.
 - **It's Sam's code, with Sam's lessons.** Before changing anything in
   `traitors/`, read Project Sam's CLAUDE.md "Project landmines" (speech and
   sound only after a tap, `fit.js` and `cqw` units for phones, the puppet
@@ -304,7 +308,7 @@ so, kindly.
   `sips --cropOffset 0 0` crops from the centre.
 
 ## Current status
-Updated 2026-10-30 (street v0.14.2, Charlie's Traitors v0.2.0).
+Updated 2026-10-31 (street v0.14.2, Charlie's Traitors v0.3.0).
 - **Two games and a home page (2026-10-30):** the street game moved into
   `street/`; Charlie's Traitors (a copy of Sam's game, placeholder
   pictures) is in `traitors/`; the home page picks between them. Waiting on

@@ -108,4 +108,6 @@ Charlie's home page.
    online play works
 5. Charlie's drawings replace the placeholders, one at a time, as he does
    them
+   - Done (v0.3.0): the castle, Zoe, Max, Zeebee, Coby, Zeer, Tendo, the
+     shield and the double vote dagger
 - Gate: Charlie plays it on his iPad and says whether it's fun

@@ -72,5 +72,7 @@ class NoCache(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")
         super().end_headers()
-http.server.ThreadingHTTPServer(("0.0.0.0", int(sys.argv[1])), NoCache).serve_forever()
+class Server(http.server.ThreadingHTTPServer):
+    request_queue_size = 128   # a page loads ~20 files at once; the usual 5 turned one away
+Server(("0.0.0.0", int(sys.argv[1])), NoCache).serve_forever()
 ' "$PORT"
