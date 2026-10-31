@@ -259,7 +259,8 @@ themselves, and nothing Charlie changes reaches Sam's.
   them all. Each takes a Sam character's place and keeps its id and
   mission skills. Since v0.4.0 all 22 have their own descriptions, lines and
   food reasons, written by Claude to tweak later (`traitors/docs/characters.md`);
-  nothing they say is Sam's. The 16 undrawn keep Sam's names for now.
+  their personal lines aren't Sam's, but the shared game talk in `castle.js`
+  (accusing, defending) still is. The 16 undrawn keep Sam's names for now.
 - **It's Sam's code, with Sam's lessons.** Before changing anything in
   `traitors/`, read Project Sam's CLAUDE.md "Project landmines" (speech and
   sound only after a tap, `fit.js` and `cqw` units for phones, the puppet
