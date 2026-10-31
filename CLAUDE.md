@@ -256,7 +256,7 @@ themselves, and nothing Charlie changes reaches Sam's.
   The castle is Charlie's since v0.3.0; the station and rooms are made
   pictures from Sam's game. Charlie's so far: Zoe, Max, Zeebee, Coby, Zeer,
   Tendo, the shield and dagger; `tools/image-fix/charlie_traitors.sh` makes
-  them all. Each takes a Sam character's place and keeps its id and way of
+  them all. Each takes a Sam character's place and keeps its id and
   mission skills. Since v0.4.0 all 22 have their own descriptions, lines and
   food reasons, written by Claude to tweak later (`traitors/docs/characters.md`);
   nothing they say is Sam's. The 16 undrawn keep Sam's names for now.
