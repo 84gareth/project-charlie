@@ -36,7 +36,7 @@ test("a mission every day from day 2, all different; none on day 1", () => {
   assert.eq(seen.size, 11);
 });
 
-test("everyone has a skill entry, and Max Muddle is bad at memory", () => {
+test("everyone has a skill entry, and Max is bad at memory", () => {
   for (const c of CHARACTERS) assert.ok(SKILLS[c.id], c.id);
   assert.eq(SKILLS.max.memory, -1);
 });

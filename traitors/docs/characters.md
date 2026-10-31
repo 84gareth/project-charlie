@@ -40,6 +40,32 @@ otherwise:
 
 Still placeholders: the other 16 characters, the fire pit and the flames.
 
+## Who they are (Charlie's Traitors)
+Made up by Claude on 2026-10-31 at Gareth's request, to tweak later ("unique personalities, description and dialogue"), except Zoe's description, which is Charlie's. Their lines are in `js/dialogue.js`, foods in `HATES` in `js/missions.js`. The 16 still using Sam's names keep the name until Charlie draws and renames them.
+
+- **Captain Puddle** (`puddle`): Sails a tiny boat in puddles. Thinks every puddle is the sea.
+- **Granny Gumdrop** (`gumdrop`): Keeps a sweet in every pocket, but forgets which pocket.
+- **Zeer** (`fizz`): Has the biggest eyes in the castle, and never ever blinks.
+- **Ruby Rails** (`ruby`): Drives the slowest train ever. Says it's never late.
+- **Chef Pepper** (`pepper`): A chef who puts sprinkles on everything. Even soup.
+- **Sir Reginald Waffle** (`waffle`): A very polite knight who says sorry to spiders.
+- **Doctor Plaster** (`plaster`): Puts a plaster on anything that looks sad. Even chairs.
+- **Lola Loud** (`lola`): Thinks shouting is whispering. It is very, very loud.
+- **Farmer Fern** (`fern`): Talks to the vegetables. Says the carrots tell secrets.
+- **Zoe** (`dot`): Likes playing games like Traitors!
+- **Benny Biscuit** (`benny`): Bakes a biscuit for every friend, then eats them all.
+- **Madame Mystic** (`mystic`): Can see the future, but always gets the weather wrong.
+- **Tendo** (`tom`): Wears sunglasses indoors, and thinks that is very cool.
+- **Zeebee** (`zara`): Has the wildest hair in the castle. Things get lost in it.
+- **Mr Grumble** (`grumble`): Says everything is rubbish. Secretly loves a cuddle.
+- **Penny Pockets** (`penny`): Counts everything. Knows how many stairs the castle has.
+- **Coby** (`kick`): Laughs at everything. Even when nothing is funny.
+- **Stationmaster Stan** (`stan`): Blows a whistle to say hello. And goodbye. And everything.
+- **Ivy Inkwell** (`ivy`): Turns everything into a story. The stories never end.
+- **Max** (`max`): Wants to be everyone's best friend, but forgets their names.
+- **Olive Oddsocks** (`olive`): Thinks socks are tiny hats for feet. Owns one hundred.
+- **Barry Banjo** (`barry`): Only knows one song. Plays it all day, every day.
+
 ---
 
 The rest is Project Sam's notes, kept for reference.

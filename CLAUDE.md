@@ -257,7 +257,9 @@ themselves, and nothing Charlie changes reaches Sam's.
   pictures from Sam's game. Charlie's so far: Zoe, Max, Zeebee, Coby, Zeer,
   Tendo, the shield and dagger; `tools/image-fix/charlie_traitors.sh` makes
   them all. Each takes a Sam character's place and keeps its id and way of
-  talking unless Charlie says otherwise.
+  mission skills. Since v0.4.0 all 22 have their own descriptions, lines and
+  food reasons, written by Claude to tweak later (`traitors/docs/characters.md`);
+  nothing they say is Sam's. The 16 undrawn keep Sam's names for now.
 - **It's Sam's code, with Sam's lessons.** Before changing anything in
   `traitors/`, read Project Sam's CLAUDE.md "Project landmines" (speech and
   sound only after a tap, `fit.js` and `cqw` units for phones, the puppet
@@ -308,7 +310,7 @@ so, kindly.
   `sips --cropOffset 0 0` crops from the centre.
 
 ## Current status
-Updated 2026-10-31 (street v0.14.2, Charlie's Traitors v0.3.0).
+Updated 2026-10-31 (street v0.14.2, Charlie's Traitors v0.4.0).
 - **Two games and a home page (2026-10-30):** the street game moved into
   `street/`; Charlie's Traitors (a copy of Sam's game, placeholder
   pictures) is in `traitors/`; the home page picks between them. Waiting on

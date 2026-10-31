@@ -94,3 +94,37 @@ test("Charlie's characters are in the game, with his names", () => {
     ["Zoe", "Max", "Zeebee", "Coby", "Zeer", "Tendo"]);
   assert.eq(CHARACTERS.find((c) => c.id === "dot").about, "Likes playing games like Traitors!", "Charlie's words");
 });
+
+// Every character is their own person (Gareth, 2026-10-31), and everything
+// they say is read aloud.
+import { PERSONALITY } from "../../js/dialogue.js";
+import { HATES } from "../../js/missions.js";
+
+test("every description is different and short enough for a card", () => {
+  assert.eq(new Set(CHARACTERS.map((c) => c.about)).size, 22);
+  for (const c of CHARACTERS) assert.lt(c.about.length, 65, c.name);
+});
+
+test("nobody says the same thing as anybody else", () => {
+  const seen = new Map();
+  for (const c of CHARACTERS) {
+    const p = PERSONALITY[c.id];
+    assert.ok(p.openers.length >= 4 && p.extras.length >= 5, `${c.name} has plenty to say`);
+    for (const line of [...p.openers, ...p.extras]) {
+      assert.notOk(seen.has(line), `"${line}": ${c.name} and ${seen.get(line)}`);
+      seen.set(line, c.name);
+    }
+  }
+});
+
+test("nothing they say is a stage direction the voice would read out", () => {
+  for (const c of CHARACTERS) {
+    for (const line of [...PERSONALITY[c.id].openers, ...PERSONALITY[c.id].extras]) {
+      assert.notOk(/[*_]/.test(line), `${c.name}: ${line}`);
+    }
+  }
+});
+
+test("everyone has their own reason for hating a food", () => {
+  assert.eq(new Set(CHARACTERS.map((c) => HATES[c.id][1])).size, 22);
+});
